@@ -2,7 +2,6 @@
 
 import os
 import re
-import shutil
 import subprocess
 import importlib
 
@@ -17,22 +16,17 @@ def main():
 
     setup = 'z'
     
-    # sudo_check() 
+    sudo_check() 
 
-    # HOME = os.getenv('home')
-    # os.chdir(f'{home}/scripts/')
-    # console.print("Working on > ", os.getcwd())
-    
-    
 
-    # user_answer = input("set resolution 1920x1080? y/n: ").lower()
-    #console.print("run aranddr to proper set up", style='ok')
-    # try:
-    #     if user_answer == 'y':
-    #      os.system('xrandr -s 1920x1080')
-     # except exception():
-     #    print(Exception())       
-     #    pass
+    user_answer = input("set resolution 1920x1080? y/n: ").lower()
+    console.print("run aranddr to proper set up", style='ok')
+    try:
+         if user_answer == 'y':
+             os.system('xrandr -s 1920x1080')
+    except Exception():
+         print(Exception())       
+         pass
 
     console.print('optimizing dnf.conf', style='ok')
     dnf_config()
@@ -40,8 +34,8 @@ def main():
     # modules_to_check = ["rich", "pandas"]
     # pip_modules(modules_to_check)
     
-    #install_programs_dnf()
-    #zsh_fonts()
+    install_programs_dnf()
+    zsh_fonts()
 
 # Pass D or L to copy_dotfiles function
     while (True): 
@@ -53,16 +47,15 @@ def main():
     
 
 
-
 #END OF MAIN
 
 def dnf_config():
     # dnf conf
-    with open('tt.txt', 'r+') as f:
+    with open('/etc/dnf/dnf.conf' , 'r+') as f:
         text = 'max_parallel_downloads=10 \nfastestmirror=true' 
         match = re.search(r'(max_parallel_downloads=10)', f.read())
         if not match:
-            with open('tt.txt', 'a+') as f:
+            with open('/etc/dnf/dnf.conf', 'a+') as f:
                 f.write(text)
                 console.print(' changes made to dnf_config :heavy_check_mark:', style='ok')
         else:
@@ -76,12 +69,12 @@ def install_programs_dnf():
     with open("data.txt", 'r') as file:
         for line in file:
             programs.append(line.strip())
-        print(programs)
 
     try:
-        subprocess.check_call(['dnf', 'install', *programs])   
+        subprocess.check_call(['dnf', 'install', '-y', *programs])   
     except:
-        console.print(exception(),":x:" , style='error')
+        console.print(Exception(),":x:" , style='error')
+        continue        
 
 
 ## pip 
@@ -105,8 +98,8 @@ def pip_modules(modules):
 
 ## checks for sudo 
 def sudo_check():
-    user = os.getenv("sudo_user")
-    if user is none:
+    user = os.getenv("SUDO_USER")
+    if user is None:
         console.print("this program need 'sudo'", style='error')
         exit()
     else:
@@ -114,7 +107,6 @@ def sudo_check():
 
 # Oh my zsh setup + flathub 
 def zsh_fonts():
-    
     with Progress() as progress:
         task = progress.add_task("[cyan]Installing Zhs etc...", total=5)
         while not progress.finished:
@@ -169,9 +161,6 @@ def copy_dotfiles(setup):
     for dir in lis:
         source = os.path.join(home, 'repos/dotfiles', dir)
         print(subprocess.run(f'cp -r {dotfiles_dir} {destination}', shell=True))
-
-
-
 
 
 
