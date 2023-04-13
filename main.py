@@ -15,7 +15,6 @@ console = Console(theme=ap_theme)
 def main():
 
     setup = 'z'
-    
     sudo_check() 
 
 
@@ -26,7 +25,6 @@ def main():
              os.system('xrandr -s 1920x1080')
     except Exception():
          print(Exception())       
-         pass
 
     console.print('optimizing dnf.conf', style='ok')
     dnf_config()
@@ -42,7 +40,7 @@ def main():
         console.print('Set up dotfiles for Desktop (D) or Laptop  (L) ?', style='promp')
         setup = input('>').lower()
         if setup == 'l' or setup == 'd':
-            copy_dotfile(setup)
+            copy_dotfiles(setup)
             break
     
 
@@ -61,6 +59,9 @@ def dnf_config():
         else:
             console.print(' dnf.conf already optimized :heavy_check_mark:', style='checkt')
 
+    subprocess.check_call('sudo dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm', shell=True)  
+    subprocess.check_call('sudo dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm', shell=True)
+    console.print('rpmfusion added to repos :heavy_check_mark:', style='ok')
 
 # install programs dnf
 def install_programs_dnf():
@@ -74,7 +75,6 @@ def install_programs_dnf():
         subprocess.check_call(['dnf', 'install', '-y', *programs])   
     except:
         console.print(Exception(),":x:" , style='error')
-        continue        
 
 
 ## pip 
@@ -86,15 +86,15 @@ def pip_modules(modules):
     for module in modules:
         try:
             importlib.import_module(module)
-        except importerror:
+        except Importerror:
             missing_modules.append(module)
     if missing_modules:
         console.print(f"the following modules are missing: {', '.join(missing_modules)}", style='checkt')
         install_pip_modules(missing_modules)
-        return false
+        return False
     else:
         console.print("all modules are installed. :heavy_check_mark:", style='ok')
-        return true
+        return True
 
 ## checks for sudo 
 def sudo_check():
@@ -136,10 +136,10 @@ def zsh_fonts():
             subprocess.run('flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo', shell=True)
             progress.update(task, advance=1)
 
+# copy and override dotfiles 
 def copy_dotfiles(setup):
 
     home = os.path.expanduser("~")
-    dotfiles_dir = os.getcwd()
 
     # list of relevant configs
     lis = list(next(os.walk('.'))[1])
@@ -155,20 +155,16 @@ def copy_dotfiles(setup):
     if ('.zshrc' in lis) :
         lis.remove('.zshrc')
 
+
+    dotfiles_dir = os.getcwd()
     destination = os.path.join(home,'.config')
 
     # copying files recusrsively
     for dir in lis:
-        source = os.path.join(home, 'repos/dotfiles', dir)
         print(subprocess.run(f'cp -r {dotfiles_dir} {destination}', shell=True))
-
-
 
 def executable_scripts():
     pass
-
-
-
 
 
 if __name__ == '__main__':
