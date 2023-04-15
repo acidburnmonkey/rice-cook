@@ -4,6 +4,7 @@ import os
 import re
 import subprocess
 import importlib
+import requests
 
 from rich.console import Console
 from rich.progress import Progress
@@ -119,7 +120,10 @@ def zsh_fonts():
     
             console.print("installing oh my zsh ", style='ok')
             #installs oh my zsh
-            subprocess.run('sh -c "$(curl -fssl https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"', shell= True)
+            url = "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
+            response = requests.get(url)
+            script = response.text
+            subprocess.run(script, shell=True, check=True)
             progress.update(task, advance=1)
 
             console.print("installing oh my zsh auto sugestions ", style='ok')
@@ -151,7 +155,6 @@ def copy_dotfiles(setup):
     lis = list(next(os.walk('.'))[1])
 
     lis.append('picom.conf')
-    lis.remove('.git')
     if ('desktop' in lis):
         lis.remove('desktop')
     if ( '.git'in lis ):
@@ -170,7 +173,7 @@ def copy_dotfiles(setup):
         console.print("Setting up dotfiles for Laptop", style='ok')
         # copying files recusrsively
         for dir in lis:
-            print(subprocess.run(f'cp -r {dotfiles_dir} {destination}', shell=True))
+            print(subprocess.run(f'cp -r {dir} {destination}', shell=True))
     
     elif (setup =='d'):
         console.print("Setting up dotfiles for Desktop", style='ok')
@@ -178,12 +181,12 @@ def copy_dotfiles(setup):
         if ('i3' in lis):
             lis.remove('i3')
         if ('polybar' in lis):
-            lis.remove('i3')
+            lis.remove('polybar')
         lis.append('desktop/i3', 'desktop/polybar')
 
         # copying files recusrsively
         for dir in lis:
-            print(subprocess.run(f'cp -r {dotfiles_dir} {destination}', shell=True))
+            print(subprocess.run(f'cp -r {dir} {destination}', shell=True))
 
 
 def executable_scripts():
