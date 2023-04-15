@@ -63,7 +63,8 @@ def dnf_config():
     subprocess.check_call('sudo dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm', shell=True)
     console.print('rpmfusion added to repos :heavy_check_mark:', style='ok')
 
-# install programs dnf
+
+# install programs dnfmax list i can pass to dnf of programs to install
 def install_programs_dnf():
     programs =[]
 
@@ -99,6 +100,7 @@ def pip_modules(modules):
     else:
         console.print("all modules are installed. :heavy_check_mark:", style='ok')
         return True
+
 
 ## checks for sudo 
 def sudo_check():
@@ -147,9 +149,9 @@ def copy_dotfiles(setup):
 
     # list of relevant configs
     lis = list(next(os.walk('.'))[1])
+
     lis.append('picom.conf')
     lis.remove('.git')
-
     if ('desktop' in lis):
         lis.remove('desktop')
     if ( '.git'in lis ):
@@ -159,17 +161,35 @@ def copy_dotfiles(setup):
     if ('.zshrc' in lis) :
         lis.remove('.zshrc')
 
-
     dotfiles_dir = os.getcwd()
     destination = os.path.join(home,'.config')
 
-    # copying files recusrsively
-    for dir in lis:
-        print(subprocess.run(f'cp -r {dotfiles_dir} {destination}', shell=True))
+    subprocess.run(f"cp -r {os.path.join(dotfiles_dir,'.zshrc')} {home}", shell=True)
+
+    if (setup =='l'):
+        console.print("Setting up dotfiles for Laptop", style='ok')
+        # copying files recusrsively
+        for dir in lis:
+            print(subprocess.run(f'cp -r {dotfiles_dir} {destination}', shell=True))
+    
+    elif (setup =='d'):
+        console.print("Setting up dotfiles for Desktop", style='ok')
+
+        if ('i3' in lis):
+            lis.remove('i3')
+        if ('polybar' in lis):
+            lis.remove('i3')
+        lis.append('desktop/i3', 'desktop/polybar')
+
+        # copying files recusrsively
+        for dir in lis:
+            print(subprocess.run(f'cp -r {dotfiles_dir} {destination}', shell=True))
+
 
 def executable_scripts():
     pass
 
 
 if __name__ == '__main__':
-    install_programs_dnf()
+    copy_dotfiles('d')
+    executable_scripts()
