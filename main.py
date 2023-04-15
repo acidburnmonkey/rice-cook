@@ -71,10 +71,14 @@ def install_programs_dnf():
         for line in file:
             programs.append(line.strip())
 
-    try:
-        subprocess.check_call(['dnf', 'install', '-y', *programs])   
-    except:
-        console.print(Exception(),":x:" , style='error')
+#for some reason they have to be passed to dnf individually 
+# instead of unpacked list *programs
+    for program in programs: 
+        try:
+            subprocess.run(f'dnf install -y {program} ', shell=True)
+        except:
+            console.print(Exception(),":x:" , style='error')
+    
 
 
 ## pip 
@@ -86,7 +90,7 @@ def pip_modules(modules):
     for module in modules:
         try:
             importlib.import_module(module)
-        except Importerror:
+        except ImportError():
             missing_modules.append(module)
     if missing_modules:
         console.print(f"the following modules are missing: {', '.join(missing_modules)}", style='checkt')
@@ -168,4 +172,4 @@ def executable_scripts():
 
 
 if __name__ == '__main__':
-    main()
+    install_programs_dnf()
