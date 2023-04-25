@@ -15,11 +15,11 @@ console = Console(theme=ap_theme)
 
 def main():
 
-    setup = 'z'
+    setup = ''
     sudo_check() 
 
-
-    user_answer = input("set resolution 1920x1080? y/n: ").lower()
+    #set temporary resolution for sesion 
+    user_answer = input("Set resolution 1920x1080? y/n: ").lower()
     console.print("run aranddr to proper set up", style='ok')
     try:
          if user_answer == 'y':
@@ -67,8 +67,9 @@ def dnf_config():
 
 # install programs dnfmax list i can pass to dnf of programs to install
 def install_programs_dnf():
-    programs =[]
+    console.rule("Installing All Programs DNF ", style='checkt')
 
+    programs =[]
     with open("data.txt", 'r') as file:
         for line in file:
             programs.append(line.strip())
@@ -107,15 +108,17 @@ def pip_modules(modules):
 def sudo_check():
     user = os.getenv("SUDO_USER")
     if user is None:
-        console.print("this program need 'sudo'", style='error')
+        console.print("This program must run with 'sudo -u USER ./script'", style='error')
         exit()
     else:
         console.print('ok :heavy_check_mark:', style='ok')
 
 # Oh my zsh setup + flathub 
 def zsh_fonts():
+    console.rule("Installing Zsh fonts", style='checkt')
+
     with Progress() as progress:
-        task = progress.add_task("[cyan]Installing Zhs etc...", total=5)
+        task = progress.add_task("[cyan]Installing Zhs etc...", total=4)
         while not progress.finished:
     
             console.print("installing oh my zsh ", style='ok')
@@ -135,11 +138,6 @@ def zsh_fonts():
             #powerlevel 10k
             subprocess.run('git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${zsh_custom:-$home/.oh-my-zsh/custom}/themes/powerlevel10k', shell=True)
             progress.update(task, advance=1)
-            
-            console.print("installing microsoft fonts", style='ok')
-            # microsoft fonts fedora
-            subprocess.run('sudo rpm -i https://downloads.sourceforge.net/project/mscorefonts2/rpms/msttcore-fonts-installer-2.6-1.noarch.rpm', shell=True)
-            progress.update(task, advance=1)
 
             console.print("installing flathub", style='ok')
             # flathub
@@ -148,6 +146,7 @@ def zsh_fonts():
 
 # copy and override dotfiles 
 def copy_dotfiles(setup):
+    console.rule("Copying Dotfiles", style='checkt')
 
     home = os.path.expanduser("~")
 
@@ -190,9 +189,16 @@ def copy_dotfiles(setup):
 
 
 def executable_scripts():
-    pass
+    home = os.path.expanduser("~")
+
+    for root ,b,files in os.walk(os.path.join(home,'.config')):
+        for element in files:
+            if '.sh' in element or '.py' in element:
+                try:
+                    subprocess.run(f"chmod +x {os.path.join(root,element)}", shell=True) 
+                except Exception():
+                    print(Exception())
 
 
 if __name__ == '__main__':
     copy_dotfiles('d')
-    executable_scripts()
