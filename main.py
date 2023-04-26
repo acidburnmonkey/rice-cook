@@ -5,10 +5,16 @@ import re
 import subprocess
 import importlib
 import requests
-
+import logging
 from rich.console import Console
 from rich.progress import Progress
 from rich.theme import Theme
+
+
+logging.basicConfig(
+        format="%(asctime)s | %(levelno)s | %(funcName)s| %(message)s ",
+        filename='installer.log'
+        )
 
 ap_theme = Theme({'ok':'green', 'error':'red', 'checkt':'bold cyan','promp':'orange1'})
 console = Console(theme=ap_theme)
@@ -20,12 +26,12 @@ def main():
 
     #set temporary resolution for sesion 
     user_answer = input("Set resolution 1920x1080? y/n: ").lower()
-    console.print("run aranddr to proper set up", style='ok')
+    console.print("Run aranddr to proper set up", style='ok')
     try:
          if user_answer == 'y':
              os.system('xrandr -s 1920x1080')
-    except Exception():
-         print(Exception())       
+    except Exception as e:
+        logging.critical(f"Error at xrandr: {str(e)}")    
 
     console.print('optimizing dnf.conf', style='ok')
     dnf_config()
@@ -43,12 +49,17 @@ def main():
         if setup == 'l' or setup == 'd':
             copy_dotfiles(setup)
             break
-    
+ 
+    executable_scripts()
+    msic_configs()
 
-
-#END OF MAIN
+################
+# END OF MAIN #
+################
 
 def dnf_config():
+    console.rule("Configuring dnf", style='checkt')
+
     # dnf conf
     with open('/etc/dnf/dnf.conf' , 'r+') as f:
         text = 'max_parallel_downloads=10 \nfastestmirror=true' 
@@ -79,8 +90,9 @@ def install_programs_dnf():
     for program in programs: 
         try:
             subprocess.run(f'dnf install -y {program} ', shell=True)
-        except:
+        except Exception as e:
             console.print(Exception(),":x:" , style='error')
+            logging.critical(f"Error at Installing programs: {str(e)}")    
     
 
 
@@ -189,15 +201,19 @@ def copy_dotfiles(setup):
 
 
 def executable_scripts():
+    console.rule('Making scripts executable', style=checkt)
     home = os.path.expanduser("~")
 
-    for root ,b,files in os.walk(os.path.join(home,'.config')):
+    for root ,_,files in os.walk(os.path.join(home,'.config')):
         for element in files:
             if '.sh' in element or '.py' in element:
                 try:
                     subprocess.run(f"chmod +x {os.path.join(root,element)}", shell=True) 
-                except Exception():
-                    print(Exception())
+                except Exception as e:
+                    logging.critical(f"Error at executable_scripts: {str(e)}")    
+
+def msic_configs():
+    pass
 
 
 if __name__ == '__main__':
