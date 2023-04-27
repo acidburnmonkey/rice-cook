@@ -7,7 +7,6 @@
 import os
 import re
 import subprocess
-import importlib
 import requests
 import logging
 import gdown
@@ -20,7 +19,7 @@ from rich.theme import Theme
 
 logging.basicConfig(
         format="%(asctime)s | %(levelno)s | %(funcName)s| %(message)s ",
-        filename='installer.log'
+        filename='logg.log'
         )
 
 ap_theme = Theme({'ok':'green', 'error':'red', 'checkt':'bold cyan','promp':'orange1'})
@@ -57,8 +56,6 @@ def main():
     console.print('optimizing dnf.conf', style='ok')
     dnf_config()
 
-    # modules_to_check = ["rich", "pandas"]
-    # pip_modules(modules_to_check)
     
     install_programs_dnf()
     zsh_fonts()
@@ -76,6 +73,8 @@ def main():
     
     #correcting ownership
     subprocess.run(f"chown -R {user}:{user} {home}",shell=True ,stdout=subprocess.DEVNULL)
+    
+    console.print("Script done check log and Reboot \n -Run aranddr \n -nitrogen \n -lxappearance", style='checkt')
 
 ################
 # END OF MAIN #
@@ -98,6 +97,9 @@ def dnf_config():
     subprocess.check_call('sudo dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm',stdout=subprocess.DEVNULL,  shell=True)  
     subprocess.check_call('sudo dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm',stdout=subprocess.DEVNULL, shell=True)
     console.print('rpmfusion added to repos :heavy_check_mark:', style='ok')
+    
+    #update Dnf 
+    subprocess.run('dnf update && dnf upgrade', shell=True)
 
 
 # install programs dnfmax list i can pass to dnf of programs to install
@@ -117,28 +119,12 @@ def install_programs_dnf():
         except Exception as e:
             console.print(Exception(),":x:" , style='error')
             logging.critical(f"Error at Installing programs: {str(e)}")    
-    
+
+
 
 ## pip 
 def install_pip_modules(modules):
-
     subprocess.check_call(['pip', 'install', *modules])
-
-def pip_modules(modules):
-    missing_modules = []
-    for module in modules:
-        try:
-            importlib.import_module(module)
-        except ImportError():
-            missing_modules.append(module)
-    if missing_modules:
-        console.print(f"the following modules are missing: {', '.join(missing_modules)}", style='checkt')
-        install_pip_modules(missing_modules)
-        return False
-
-    else:
-        console.print("all modules are installed. :heavy_check_mark:", style='ok')
-        return True
 
 
 ## checks for sudo 
@@ -174,7 +160,7 @@ def zsh_fonts():
 
     except Exception as e:
         logging.warning(f"Could not set up Zsh: {str(e)}")
-    
+        console.print("Error setting up ohmyzsh :X:", style='error')
 
     console.print("installing flathub", style='ok')
     # flathub
@@ -222,6 +208,7 @@ def copy_dotfiles(setup):
         for dir in lis:
             print(subprocess.run(f'cp -r {dir} {destination}', shell=True))
 
+    console.print("Dotfiles copied :heavy_check_mark:", style='ok')
 
 def executable_scripts():
     console.rule('Making scripts executable', style='checkt')
@@ -242,6 +229,7 @@ def msic_configs():
     try :
         os.mkdir('misic')
         os.mkdir(os.path.join(home,'.fonts'))
+        os.mkdir(os.path.join(home,'.themes'))
     except FileExistsError:
         pass
 
@@ -255,6 +243,8 @@ def msic_configs():
     subprocess.run(f"unzip {output} -d {os.path.join(home,'.fonts')}",stdout=subprocess.DEVNULL ,shell=True)
     subprocess.run("fc-cache -f",stdout=subprocess.DEVNULL ,shell=True)
 
+    console.print("Fonts downloaded :heavy_check_mark:", style='ok')
+
     #### i3 autotiling 
     autotiling_url = 'https://raw.githubusercontent.com/nwg-piotr/autotiling/master/autotiling/main.py'
     tiler = requests.get(autotiling_url, allow_redirects=True, timeout=10)
@@ -262,6 +252,28 @@ def msic_configs():
     subprocess.run('chmod +x autotiling', shell=True, stdout=subprocess.DEVNULL)
     subprocess.run('cp autotiling /bin', shell=True, stdout=subprocess.DEVNULL)
 
+    console.print("I3 autotliling has been set :heavy_check_mark:", style='ok')
+
+    #Icons 
+    subprocess.run('git clone --depth 1 https://github.com/EliverLara/candy-icons.git /usr/share/icons/', shell=True, stdout=subprocess.DEVNULL)
+    console.print("Icons have been downloaded :heavy_check_mark:", style='ok')
+
+    try:
+        themes_urls =['https://drive.google.com/uc?id=1KkqC5vaBjePSHxjBI_8PWfm3jNW5gO7k','https://drive.google.com/uc?id=1-qq3wmuQhkKHpW_8OrRNS92AHD9LE4un' 
+                              ,'https://drive.google.com/uc?id=1mxkN9b4Ws7CeqF_KaTlA3dA5e75UUa4y','https://drive.google.com/uc?id=1cYLRsxmWeQJMOS7QEGEgJenRPKxgwN7X']
+
+        for index,file in enumerate(themes_urls):
+            output = str(index)+'.zip' 
+            gdown.download(file, output ,quiet=False)
+            subprocess.run(f"unzip {output} -d {os.path.join(home,'.themes')}", shell=True, stdout=subprocess.DEVNULL)
+
+        console.print("Themes have been downloaded :heavy_check_mark:", style='ok')
+
+    except Exception as e:
+        logging.critical(f"Could not get themes :{str(e)}")
+        console.print("Error with Themes :X:", style='error')
+
 
 if __name__ == '__main__':
     main()
+
