@@ -14,6 +14,9 @@ import gdown
 from rich.console import Console
 from rich.theme import Theme
 
+# pylint: disable=subprocess-run-check
+# pylint: disable=broad-exception-caught
+# pylint: disable=logging-fstring-interpolation
 
 logging.basicConfig(
         format="%(asctime)s | %(levelno)s | %(funcName)s| %(message)s ",
@@ -29,7 +32,18 @@ home = os.path.join('/home',user)
 def main():
 
     setup = ''
-    sudo_check() 
+    confirm_user =''
+
+    sudo_check()
+    
+    console.print(f"Setting up for user {user} ", style='promp')
+    while(True):
+        confirm_user = input(" y/n ")
+        if (confirm_user.lower() == 'n'):
+            exit()
+        elif (confirm_user.lower() == 'y'):
+            break
+
 
     #set temporary resolution for sesion 
     user_answer = input("Set resolution 1920x1080? y/n: ").lower()
@@ -59,6 +73,9 @@ def main():
  
     executable_scripts()
     msic_configs()
+    
+    #correcting ownership
+    subprocess.run(f"chown -R {user}:{user} {home}",shell=True ,stdout=subprocess.DEVNULL)
 
 ################
 # END OF MAIN #
@@ -126,8 +143,8 @@ def pip_modules(modules):
 
 ## checks for sudo 
 def sudo_check():
-    user = os.getenv("SUDO_USER")
-    if user is None:
+    sudo_user = os.getenv("SUDO_USER")
+    if sudo_user is None:
         console.print("This program must run as sudo -HE ./script ", style='error')
         exit()
     else:
@@ -142,7 +159,7 @@ def zsh_fonts():
 
         #installs oh my zsh
         ohmy_url = "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
-        zsh_installer = requests.get(ohmy_url)
+        zsh_installer = requests.get(ohmy_url, timeout=10)
         open('install.sh', 'wb').write(zsh_installer.content)
         subprocess.run('chmod +x install.sh ', stdout=subprocess.DEVNULL, shell=True, check=True)
         subprocess.run(f'sudo -u {user} ./install.sh', shell=True, check=True)
@@ -240,7 +257,7 @@ def msic_configs():
 
     #### i3 autotiling 
     autotiling_url = 'https://raw.githubusercontent.com/nwg-piotr/autotiling/master/autotiling/main.py'
-    tiler = requests.get(autotiling_url, allow_redirects=True)
+    tiler = requests.get(autotiling_url, allow_redirects=True, timeout=10)
     open('autotiling', 'wb').write(tiler.content)
     subprocess.run('chmod +x autotiling', shell=True, stdout=subprocess.DEVNULL)
     subprocess.run('cp autotiling /bin', shell=True, stdout=subprocess.DEVNULL)
