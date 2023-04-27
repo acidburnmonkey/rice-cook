@@ -1,13 +1,17 @@
 #!/bin/python3
 
+# Program Shoud run with sudo -HE 
+# https://github.com/acidburnmonkey
+#
+
 import os
 import re
 import subprocess
 import importlib
 import requests
 import logging
+import gdown
 from rich.console import Console
-from rich.progress import Progress
 from rich.theme import Theme
 
 
@@ -18,6 +22,9 @@ logging.basicConfig(
 
 ap_theme = Theme({'ok':'green', 'error':'red', 'checkt':'bold cyan','promp':'orange1'})
 console = Console(theme=ap_theme)
+
+user = input("Type user name: ")
+home = os.path.join('/home',user)
 
 def main():
 
@@ -71,8 +78,8 @@ def dnf_config():
         else:
             console.print(' dnf.conf already optimized :heavy_check_mark:', style='checkt')
 
-    subprocess.check_call('sudo dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm', shell=True)  
-    subprocess.check_call('sudo dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm', shell=True)
+    subprocess.check_call('sudo dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm',stdout=subprocess.DEVNULL,  shell=True)  
+    subprocess.check_call('sudo dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm',stdout=subprocess.DEVNULL, shell=True)
     console.print('rpmfusion added to repos :heavy_check_mark:', style='ok')
 
 
@@ -95,9 +102,9 @@ def install_programs_dnf():
             logging.critical(f"Error at Installing programs: {str(e)}")    
     
 
-
 ## pip 
 def install_pip_modules(modules):
+
     subprocess.check_call(['pip', 'install', *modules])
 
 def pip_modules(modules):
@@ -111,6 +118,7 @@ def pip_modules(modules):
         console.print(f"the following modules are missing: {', '.join(missing_modules)}", style='checkt')
         install_pip_modules(missing_modules)
         return False
+
     else:
         console.print("all modules are installed. :heavy_check_mark:", style='ok')
         return True
@@ -120,7 +128,7 @@ def pip_modules(modules):
 def sudo_check():
     user = os.getenv("SUDO_USER")
     if user is None:
-        console.print("This program must run with 'sudo -u USER ./script'", style='error')
+        console.print("This program must run as sudo -HE ./script ", style='error')
         exit()
     else:
         console.print('ok :heavy_check_mark:', style='ok')
@@ -128,39 +136,37 @@ def sudo_check():
 # Oh my zsh setup + flathub 
 def zsh_fonts():
     console.rule("Installing Zsh fonts", style='checkt')
-
-    with Progress() as progress:
-        task = progress.add_task("[cyan]Installing Zhs etc...", total=4)
-        while not progress.finished:
     
-            console.print("installing oh my zsh ", style='ok')
-            #installs oh my zsh
-            url = "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
-            response = requests.get(url)
-            script = response.text
-            subprocess.run(script, shell=True, check=True)
-            progress.update(task, advance=1)
+    try:
+        console.print("installing oh my zsh ", style='ok')
 
-            console.print("installing oh my zsh auto sugestions ", style='ok')
-            # zsh auto sugestions
-            subprocess.run('git clone https://github.com/zsh-users/zsh-autosuggestions ${zsh_custom:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions', shell=True)
-            progress.update(task, advance=1)
+        #installs oh my zsh
+        ohmy_url = "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
+        zsh_installer = requests.get(ohmy_url)
+        open('install.sh', 'wb').write(zsh_installer.content)
+        subprocess.run('chmod +x install.sh ', stdout=subprocess.DEVNULL, shell=True, check=True)
+        subprocess.run(f'sudo -u {user} ./install.sh', shell=True, check=True)
 
-            console.print("installing powerlevel10k ", style='ok')
-            #powerlevel 10k
-            subprocess.run('git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${zsh_custom:-$home/.oh-my-zsh/custom}/themes/powerlevel10k', shell=True)
-            progress.update(task, advance=1)
+        console.print("installing oh my zsh auto sugestions ", style='ok')
+        # zsh auto sugestions
+        subprocess.run('git clone https://github.com/zsh-users/zsh-autosuggestions ${zsh_custom:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions', shell=True)
 
-            console.print("installing flathub", style='ok')
-            # flathub
-            subprocess.run('flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo', shell=True)
-            progress.update(task, advance=1)
+        console.print("installing powerlevel10k ", style='ok')
+        #powerlevel 10k
+        subprocess.run('git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${zsh_custom:-$home/.oh-my-zsh/custom}/themes/powerlevel10k', shell=True)
+
+    except Exception as e:
+        logging.warning(f"Could not set up Zsh: {str(e)}")
+    
+
+    console.print("installing flathub", style='ok')
+    # flathub
+    subprocess.run('flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo', shell=True, stdout=subprocess.DEVNULL)
 
 # copy and override dotfiles 
 def copy_dotfiles(setup):
     console.rule("Copying Dotfiles", style='checkt')
 
-    home = os.path.expanduser("~")
 
     # list of relevant configs
     lis = list(next(os.walk('.'))[1])
@@ -193,16 +199,15 @@ def copy_dotfiles(setup):
             lis.remove('i3')
         if ('polybar' in lis):
             lis.remove('polybar')
-        lis.append('desktop/i3', 'desktop/polybar')
-
+        lis.append('desktop/i3')
+        lis.append('desktop/polybar')
         # copying files recusrsively
         for dir in lis:
             print(subprocess.run(f'cp -r {dir} {destination}', shell=True))
 
 
 def executable_scripts():
-    console.rule('Making scripts executable', style=checkt)
-    home = os.path.expanduser("~")
+    console.rule('Making scripts executable', style='checkt')
 
     for root ,_,files in os.walk(os.path.join(home,'.config')):
         for element in files:
@@ -211,10 +216,35 @@ def executable_scripts():
                     subprocess.run(f"chmod +x {os.path.join(root,element)}", shell=True) 
                 except Exception as e:
                     logging.critical(f"Error at executable_scripts: {str(e)}")    
+    console.print("Job done :heavy_check_mark:", style='ok')
 
 def msic_configs():
-    pass
+    console.rule('Setting up final configs', style='checkt')
+
+    current_dir = os.getcwd()
+    try :
+        os.mkdir('misic')
+        os.mkdir(os.path.join(home,'.fonts'))
+    except FileExistsError:
+        pass
+
+    os.chdir(os.path.join(current_dir,'misic'))
+
+    #### Fonts 
+    # https://drive.google.com/drive/folders/1BciF4x3_K3T8p1Y17lHn_xWXnSAZpvDE
+    fonts_url = 'https://drive.google.com/uc?id=1-3g_CjiJHKhRrJNjjZeAYu9KIGIAAAhC'
+    output ='fonts-c.zip' 
+    gdown.download(fonts_url,output, quiet=False)
+    subprocess.run(f"unzip {output} -d {os.path.join(home,'.fonts')}",stdout=subprocess.DEVNULL ,shell=True)
+    subprocess.run("fc-cache -f",stdout=subprocess.DEVNULL ,shell=True)
+
+    #### i3 autotiling 
+    autotiling_url = 'https://raw.githubusercontent.com/nwg-piotr/autotiling/master/autotiling/main.py'
+    tiler = requests.get(autotiling_url, allow_redirects=True)
+    open('autotiling', 'wb').write(tiler.content)
+    subprocess.run('chmod +x autotiling', shell=True, stdout=subprocess.DEVNULL)
+    subprocess.run('cp autotiling /bin', shell=True, stdout=subprocess.DEVNULL)
 
 
 if __name__ == '__main__':
-    copy_dotfiles('d')
+    main()
