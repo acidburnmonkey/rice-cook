@@ -17,9 +17,16 @@ from rich.theme import Theme
 # pylint: disable=broad-exception-caught
 # pylint: disable=logging-fstring-interpolation
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+formater = logging.Formatter("%(asctime)s | %(levelno)s | %(funcName)s| %(message)s")
+f_handler = logging.FileHandler('logg.log')
+f_handler.setFormatter(formater)
+logger.addHandler(f_handler)
+
 logging.basicConfig(
         format="%(asctime)s | %(levelno)s | %(funcName)s| %(message)s ",
-        filename='logg.log'
+        filename='logg.log', level=logging.WARNING
         )
 
 ap_theme = Theme({'ok':'green', 'error':'red', 'checkt':'bold cyan','promp':'orange1'})
@@ -72,9 +79,12 @@ def main():
     msic_configs()
     
     #correcting ownership
-    subprocess.run(f"chown -R {user}:{user} {home}",shell=True ,stdout=subprocess.DEVNULL)
+    subprocess.run(f"sudo -u root chown -R {user}:{user} {home}",shell=True ,stdout=subprocess.DEVNULL)
     
     console.print("Script done check log and Reboot \n -Run aranddr \n -nitrogen \n -lxappearance", style='checkt')
+    
+    subprocess.check_call('lxappearance')
+    subprocess.check_call('exec zsh', shell=True)
 
 ################
 # END OF MAIN #
@@ -99,7 +109,7 @@ def dnf_config():
     console.print('rpmfusion added to repos :heavy_check_mark:', style='ok')
     
     #update Dnf 
-    subprocess.run('dnf update && dnf upgrade', shell=True)
+    subprocess.run('dnf upgrade -y', shell=True)
 
 
 # install programs dnfmax list i can pass to dnf of programs to install
@@ -147,16 +157,27 @@ def zsh_fonts():
         ohmy_url = "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
         zsh_installer = requests.get(ohmy_url, timeout=10)
         open('install.sh', 'wb').write(zsh_installer.content)
+        
+        #removing exec line 
+        with open('install.sh', 'r') as f:
+            contents = f.read()
+        pattern = r'^\s*exec zsh -l$'
+        matches = re.findall(pattern, contents, flags=re.MULTILINE)
+        if matches:
+            contents = re.sub(pattern, '', contents, flags=re.MULTILINE)
+            with open('install.sh', 'w') as f:
+                f.write(contents)
+
         subprocess.run('chmod +x install.sh ', stdout=subprocess.DEVNULL, shell=True, check=True)
         subprocess.run(f'sudo -u {user} ./install.sh', shell=True, check=True)
 
         console.print("installing oh my zsh auto sugestions ", style='ok')
         # zsh auto sugestions
-        subprocess.run('git clone https://github.com/zsh-users/zsh-autosuggestions ${zsh_custom:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions', shell=True)
+        subprocess.run(f'git clone https://github.com/zsh-users/zsh-autosuggestions {home}/.oh-my-zsh/custom/plugins/zsh-autosuggestions', shell=True)
 
         console.print("installing powerlevel10k ", style='ok')
         #powerlevel 10k
-        subprocess.run('git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${zsh_custom:-$home/.oh-my-zsh/custom}/themes/powerlevel10k', shell=True)
+        subprocess.run(f"git clone --depth=1 https://github.com/romkatv/powerlevel10k.git {home}/.oh-my-zsh/custom/themes/powerlevel10k", shell=True)
 
     except Exception as e:
         logging.warning(f"Could not set up Zsh: {str(e)}")
@@ -237,7 +258,7 @@ def msic_configs():
 
     #### Fonts 
     # https://drive.google.com/drive/folders/1BciF4x3_K3T8p1Y17lHn_xWXnSAZpvDE
-    fonts_url = 'https://drive.google.com/uc?id=1-3g_CjiJHKhRrJNjjZeAYu9KIGIAAAhC'
+    fonts_url = 'https://drive.google.com/uc?id=1jebIzgH9BLLn7Ou3xOnSiIj2unIdyXFI'
     output ='fonts-c.zip' 
     gdown.download(fonts_url,output, quiet=False)
     subprocess.run(f"unzip {output} -d {os.path.join(home,'.fonts')}",stdout=subprocess.DEVNULL ,shell=True)
@@ -255,7 +276,7 @@ def msic_configs():
     console.print("I3 autotliling has been set :heavy_check_mark:", style='ok')
 
     #Icons 
-    subprocess.run('git clone --depth 1 https://github.com/EliverLara/candy-icons.git /usr/share/icons/', shell=True, stdout=subprocess.DEVNULL)
+    subprocess.run('git clone --depth 1 https://github.com/EliverLara/candy-icons.git /usr/share/icons/candy-icons', shell=True, stdout=subprocess.DEVNULL)
     console.print("Icons have been downloaded :heavy_check_mark:", style='ok')
 
     try:
@@ -275,5 +296,5 @@ def msic_configs():
 
 
 if __name__ == '__main__':
-    main()
+    logger.info(main())
 
