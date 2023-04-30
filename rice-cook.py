@@ -79,12 +79,12 @@ def main():
     msic_configs()
     
     #correcting ownership
-    subprocess.run(f"sudo -u root chown -R {user}:{user} {home}",shell=True ,stdout=subprocess.DEVNULL)
+    # subprocess.run(f"sudo -u root chown -R {user}:{user} {home}",shell=True ,stdout=subprocess.DEVNULL)
     
     console.print("Script done check log and Reboot \n -Run aranddr \n -nitrogen \n -lxappearance", style='checkt')
     
     subprocess.check_call('lxappearance')
-    subprocess.check_call('exec zsh', shell=True)
+    # subprocess.check_call('exec zsh', shell=True)
 
 ################
 # END OF MAIN #
@@ -101,15 +101,18 @@ def dnf_config():
             with open('/etc/dnf/dnf.conf', 'a+') as f:
                 f.write(text)
                 console.print(' changes made to dnf_config :heavy_check_mark:', style='ok')
+            logger.info('changes made to dnf_config')
         else:
             console.print(' dnf.conf already optimized :heavy_check_mark:', style='checkt')
 
     subprocess.check_call('sudo dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm',stdout=subprocess.DEVNULL,  shell=True)  
     subprocess.check_call('sudo dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm',stdout=subprocess.DEVNULL, shell=True)
     console.print('rpmfusion added to repos :heavy_check_mark:', style='ok')
+    logger.info('rpmfusion added to repos')
     
     #update Dnf 
     subprocess.run('dnf upgrade -y', shell=True)
+    logger.info('Updated Dnf ')
 
 
 # install programs dnfmax list i can pass to dnf of programs to install
@@ -130,6 +133,7 @@ def install_programs_dnf():
             console.print(Exception(),":x:" , style='error')
             logging.critical(f"Error at Installing programs: {str(e)}")    
 
+    logger.info('Installed programs in data.txt')
 
 
 ## pip 
@@ -178,6 +182,7 @@ def zsh_fonts():
         console.print("installing powerlevel10k ", style='ok')
         #powerlevel 10k
         subprocess.run(f"git clone --depth=1 https://github.com/romkatv/powerlevel10k.git {home}/.oh-my-zsh/custom/themes/powerlevel10k", shell=True)
+        logger.info('Installed  Oh_my_zsh , powerlevel10k , autosuggestions')
 
     except Exception as e:
         logging.warning(f"Could not set up Zsh: {str(e)}")
@@ -185,7 +190,8 @@ def zsh_fonts():
 
     console.print("installing flathub", style='ok')
     # flathub
-    subprocess.run('flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo', shell=True, stdout=subprocess.DEVNULL)
+    subprocess.run('flatpak remote-add --if-not-exists flathub https://flatInstalled programs in data.txthub.org/repo/flathub.flatpakrepo', shell=True, stdout=subprocess.DEVNULL)
+    logger.info('Installed  Flathub')
 
 # copy and override dotfiles 
 def copy_dotfiles(setup):
@@ -230,6 +236,7 @@ def copy_dotfiles(setup):
             print(subprocess.run(f'cp -r {dir} {destination}', shell=True))
 
     console.print("Dotfiles copied :heavy_check_mark:", style='ok')
+    logger.info('Dotfiles copied')
 
 def executable_scripts():
     console.rule('Making scripts executable', style='checkt')
@@ -242,6 +249,7 @@ def executable_scripts():
                 except Exception as e:
                     logging.critical(f"Error at executable_scripts: {str(e)}")    
     console.print("Job done :heavy_check_mark:", style='ok')
+    logger.info('Made scripts in .config executable')
 
 def msic_configs():
     console.rule('Setting up final configs', style='checkt')
@@ -265,6 +273,7 @@ def msic_configs():
     subprocess.run("fc-cache -f",stdout=subprocess.DEVNULL ,shell=True)
 
     console.print("Fonts downloaded :heavy_check_mark:", style='ok')
+    logger.info('Fonts donwloaded ')
 
     #### i3 autotiling 
     autotiling_url = 'https://raw.githubusercontent.com/nwg-piotr/autotiling/master/autotiling/main.py'
@@ -274,10 +283,12 @@ def msic_configs():
     subprocess.run('cp autotiling /bin', shell=True, stdout=subprocess.DEVNULL)
 
     console.print("I3 autotliling has been set :heavy_check_mark:", style='ok')
+    logger.info('I3 autotliling instead')
 
     #Icons 
     subprocess.run('git clone --depth 1 https://github.com/EliverLara/candy-icons.git /usr/share/icons/candy-icons', shell=True, stdout=subprocess.DEVNULL)
     console.print("Icons have been downloaded :heavy_check_mark:", style='ok')
+    logger.info('candy-icons downloaded')
 
     try:
         themes_urls =['https://drive.google.com/uc?id=1KkqC5vaBjePSHxjBI_8PWfm3jNW5gO7k','https://drive.google.com/uc?id=1-qq3wmuQhkKHpW_8OrRNS92AHD9LE4un' 
@@ -289,6 +300,8 @@ def msic_configs():
             subprocess.run(f"unzip {output} -d {os.path.join(home,'.themes')}", shell=True, stdout=subprocess.DEVNULL)
 
         console.print("Themes have been downloaded :heavy_check_mark:", style='ok')
+        logger.info('Themes have been downloaded')
+
 
     except Exception as e:
         logging.critical(f"Could not get themes :{str(e)}")
