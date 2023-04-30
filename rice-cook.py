@@ -296,5 +296,5 @@ def msic_configs():
 
 
 if __name__ == '__main__':
-    logger.info(main())
+    main()
 
