@@ -10,6 +10,7 @@ import subprocess
 import requests
 import logging
 import gdown
+import pyautogui
 from rich.console import Console
 from rich.theme import Theme
 
@@ -85,6 +86,7 @@ def main():
     
     subprocess.check_call('lxappearance')
     # subprocess.check_call('exec zsh', shell=True)
+    pyautogui.hotkey('win', 'shift', 'r')
 
 ################
 # END OF MAIN #
