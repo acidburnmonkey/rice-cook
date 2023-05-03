@@ -81,8 +81,9 @@ def main():
     
     #correcting ownership
     # subprocess.run(f"sudo -u root chown -R {user}:{user} {home}",shell=True ,stdout=subprocess.DEVNULL)
-    
     console.print("Script done check log and Reboot \n -Run aranddr \n -nitrogen \n -lxappearance", style='checkt')
+
+    lock()
     
     subprocess.check_call('lxappearance')
     # subprocess.check_call('exec zsh', shell=True)
@@ -308,6 +309,22 @@ def msic_configs():
     except Exception as e:
         logging.critical(f"Could not get themes :{str(e)}")
         console.print("Error with Themes :X:", style='error')
+
+
+def lock():
+    console.rule('Setting up lock screen', style='checkt')
+    
+    #betterlockscreen
+    subprocess.run('wget https://raw.githubusercontent.com/betterlockscreen/betterlockscreen/main/install.sh -O - -q | sudo bash -s system', shell=True)
+    
+    #i3lock-color 
+    dependencies =[autoconf, automake, cairo-devel, fontconfig, gcc, libev-devel, libjpeg-turbo-devel, libXinerama, libxkbcommon-devel, libxkbcommon-x11-devel, libXrandr, pam-devel, pkgconf, xcb-util-image-devel, xcb-util-xrm-devel]
+    for i in dependencies:
+        subprocess.check_call(f"dnf install -y {i}", shell=True, stdout=subprocess.DEVNULL)
+
+    subprocess.run('git clone https://github.com/Raymo111/i3lock-color.git', shell=True)
+    os.chdir('i3lock-color')
+    subprocess.run(['./install-i3lock-color.sh'])
 
 
 if __name__ == '__main__':
