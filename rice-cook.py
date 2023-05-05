@@ -316,16 +316,21 @@ def lock():
     
     #betterlockscreen
     subprocess.run('wget https://raw.githubusercontent.com/betterlockscreen/betterlockscreen/main/install.sh -O - -q | sudo bash -s system', shell=True)
-    
+    console.print('Betterlockscreen installed :heavy_check_mark:', style='ok')
+    logger.info('betterlockscreen Installed')
+
     #i3lock-color 
-    dependencies =[autoconf, automake, cairo-devel, fontconfig, gcc, libev-devel, libjpeg-turbo-devel, libXinerama, libxkbcommon-devel, libxkbcommon-x11-devel, libXrandr, pam-devel, pkgconf, xcb-util-image-devel, xcb-util-xrm-devel]
+    dependencies =['autoconf', 'automake', 'cairo-devel', 'fontconfig', 'gcc', 'libev-devel', 'libjpeg-turbo-devel', 'libXinerama', 'libxkbcommon-devel', 'libxkbcommon-x11-devel', 'libXrandr', 'pam-devel', 'pkgconf', 'xcb-util-image-devel', 'xcb-util-xrm-devel']
+
+    console.print('Installing dependencies ', style='checkt')
     for i in dependencies:
         subprocess.check_call(f"dnf install -y {i}", shell=True, stdout=subprocess.DEVNULL)
 
     subprocess.run('git clone https://github.com/Raymo111/i3lock-color.git', shell=True)
     os.chdir('i3lock-color')
     subprocess.run(['./install-i3lock-color.sh'])
-
+    console.print('i3lock-color installed :heavy_check_mark:', style='ok')
+    logger.info('i3lock-color Installed')
 
 if __name__ == '__main__':
     main()
