@@ -32,7 +32,7 @@ ________________________________________________________________________________
 ![](images/a.png)
 
 # How to run :
-- copy binary from releases and data.txt into a dotfiles backup forlder
+- copy binary from [releases](https://github.com/acidburnmonkey/rice-cook/releases) and data.txt into a dotfiles backup forlder
 - Must run with sudo -HE flags
 ```
 sudo -HE ./rice-cook 
