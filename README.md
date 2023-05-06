@@ -2,18 +2,24 @@
 This is a python script made to rice a blank fedora i3 install into my custom configuration.
 
 # What is does :
+
 *  Allows DNF to update from fastest mirrors
  * Adds +10  max parallel downloads
 + Adds rpmfusion  to repos
-* Installs Oh_My_zsh
-	* with zsh-autosuggestions plugin
-	* powerlevel10k plugin
 * Adds Flathub to repos
 * Copies dotfliles into ~/.config 
-* Installs  25 fonts, for developers and smooth looking
-* Installs Catppuccin themes.
-* Installs candy-icons
-* Finally installs all programs given in data.txt  
+</br> </br>
+* Installs :
+*  Oh_My_zsh
+	* with zsh-autosuggestions plugin
+	* powerlevel10k plugin
+*  25 fonts, for developers and smooth looking
+*  Catppuccin themes
+* candy-icons
+*  [Betterlockscreen](https://github.com/betterlockscreen/betterlockscreen)
+* [i3lock-color](https://github.com/Raymo111/i3lock-color)
+* Finally installs all programs given in data.txt
+ 
 ________________________________________________________________________________
 
 
@@ -25,6 +31,12 @@ ________________________________________________________________________________
 ##
 ![](images/a.png)
 
+# How to run :
+- copy binary from releases and data.txt into a dotfiles backup forlder
+- Must run with sudo -HE flags
+```
+sudo -HE ./rice-cook 
+```
 
 ## Donate
 <a href="https://www.buymeacoffee.com/acidburn" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
