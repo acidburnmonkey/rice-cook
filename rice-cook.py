@@ -80,7 +80,7 @@ def main():
     msic_configs()
     
     #correcting ownership
-    # subprocess.run(f"sudo -u root chown -R {user}:{user} {home}",shell=True ,stdout=subprocess.DEVNULL)
+    # subprocess.run(f"chown -R {user}:{user} {os.path.join(home,'.config')}",shell=True ,stdout=subprocess.DEVNULL)
     console.print("Script done check log and Reboot \n -Run aranddr \n -nitrogen \n -lxappearance", style='checkt')
 
     lock()
