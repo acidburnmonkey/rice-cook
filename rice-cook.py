@@ -140,11 +140,6 @@ def install_programs_dnf():
     logger.info('Installed programs in data.txt')
 
 
-## pip 
-def install_pip_modules(modules):
-    subprocess.check_call(['pip', 'install', *modules])
-
-
 ## checks for sudo 
 def sudo_check():
     sudo_user = os.getenv("SUDO_USER")
