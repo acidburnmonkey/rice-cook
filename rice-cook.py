@@ -33,7 +33,7 @@ logging.basicConfig(
 ap_theme = Theme({'ok':'green', 'error':'red', 'checkt':'bold cyan','promp':'orange1'})
 console = Console(theme=ap_theme)
 
-user = input("Type user name: ")
+user = os.getlogin() 
 home = os.path.join('/home',user)
 
 def main():
@@ -47,7 +47,8 @@ def main():
     while(True):
         confirm_user = input(" y/n ")
         if (confirm_user.lower() == 'n'):
-            exit()
+            user = imput('Type username : ')
+            continue
         elif (confirm_user.lower() == 'y'):
             break
 
