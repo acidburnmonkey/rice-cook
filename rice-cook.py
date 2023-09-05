@@ -64,7 +64,6 @@ def main():
 
     console.print('optimizing dnf.conf', style='ok')
     dnf_config()
-
     
     install_programs_dnf()
     zsh_fonts()
@@ -195,7 +194,6 @@ def zsh_fonts():
 # copy and override dotfiles 
 def copy_dotfiles(setup):
     console.rule("Copying Dotfiles", style='checkt')
-
 
     # list of relevant configs
     lis = list(next(os.walk('.'))[1])
