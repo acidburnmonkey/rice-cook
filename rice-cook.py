@@ -36,21 +36,23 @@ console = Console(theme=ap_theme)
 user = os.getlogin() 
 home = os.path.join('/home',user)
 
+
 def main():
 
     setup = ''
-    confirm_user =''
-
+    # confirm_user =''
+    local_user = user
+    
     sudo_check()
     
-    console.print(f"Setting up for user {user} ", style='promp')
-    while(True):
-        confirm_user = input(" y/n ")
-        if (confirm_user.lower() == 'n'):
-            user = imput('Type username : ')
-            continue
-        elif (confirm_user.lower() == 'y'):
-            break
+    console.print(f"Setting up for user {local_user} ", style='promp')
+    # while(True):
+    #     confirm_user = input(" y/n ")
+    #     if (confirm_user.lower() == 'n'):
+    #         user := input('Type username : ')
+    #         continue
+    #     elif (confirm_user.lower() == 'y'):
+    #         break
 
 
     #set temporary resolution for sesion 

@@ -32,10 +32,28 @@ ________________________________________________________________________________
 ![](images/a.png)
 
 # How to run :
-- copy binary from [releases](https://github.com/acidburnmonkey/rice-cook/releases) and data.txt into a dotfiles backup forlder
-- Must run with sudo -HE flags
 ```
-sudo -HE ./rice-cook 
+git clone https://github.com/acidburnmonkey/rice-cook.git && cd rice-cook
+
+```
+```
+chmod +x preinstall.sh && sudo ./preinstall.sh
+```
+```
+sudo pip3 install -r requierements.txt
+```
+### Now move rice-cook.py & data.txt into dofiles directry and run it:
+```
+sudo python3 rice-cook.py
+```
+Should look like this .
+```
+|-dotfiles
+|---nvim
+|---ranger
+|---etc...
+|---data.txt
+|---rice-cook.py
 ```
 
 ## Donate
