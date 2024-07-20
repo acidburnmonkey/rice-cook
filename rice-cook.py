@@ -10,7 +10,6 @@ import subprocess
 import requests
 import logging
 import gdown
-import pyautogui
 from rich.console import Console
 from rich.theme import Theme
 
@@ -55,15 +54,6 @@ def main():
     #         break
 
 
-    #set temporary resolution for sesion 
-    user_answer = input("Set resolution 1920x1080? y/n: ").lower()
-    console.print("Run aranddr to proper set up", style='ok')
-    try:
-         if user_answer == 'y':
-             os.system('xrandr -s 1920x1080')
-    except Exception as e:
-        logging.critical(f"Error at xrandr: {str(e)}")    
-
     console.print('optimizing dnf.conf', style='ok')
     dnf_config()
     
@@ -83,13 +73,8 @@ def main():
     
     #correcting ownership
     # subprocess.run(f"chown -R {user}:{user} {os.path.join(home,'.config')}",shell=True ,stdout=subprocess.DEVNULL)
-    console.print("Script done check log and Reboot \n -Run aranddr \n -nitrogen \n -lxappearance", style='checkt')
 
-    lock()
     
-    subprocess.check_call('lxappearance')
-    # subprocess.check_call('exec zsh', shell=True)
-    pyautogui.hotkey('win', 'shift', 'r')
 
 ################
 # END OF MAIN #
@@ -274,16 +259,6 @@ def msic_configs():
     console.print("Fonts downloaded :heavy_check_mark:", style='ok')
     logger.info('Fonts donwloaded ')
 
-    #### i3 autotiling 
-    autotiling_url = 'https://raw.githubusercontent.com/nwg-piotr/autotiling/master/autotiling/main.py'
-    tiler = requests.get(autotiling_url, allow_redirects=True, timeout=10)
-    open('autotiling', 'wb').write(tiler.content)
-    subprocess.run('chmod +x autotiling', shell=True, stdout=subprocess.DEVNULL)
-    subprocess.run('cp autotiling /bin', shell=True, stdout=subprocess.DEVNULL)
-
-    console.print("I3 autotliling has been set :heavy_check_mark:", style='ok')
-    logger.info('I3 autotliling instead')
-
     #Icons 
     subprocess.run('git clone --depth 1 https://github.com/EliverLara/candy-icons.git /usr/share/icons/candy-icons', shell=True, stdout=subprocess.DEVNULL)
     console.print("Icons have been downloaded :heavy_check_mark:", style='ok')
@@ -306,27 +281,6 @@ def msic_configs():
         logging.critical(f"Could not get themes :{str(e)}")
         console.print("Error with Themes :X:", style='error')
 
-
-def lock():
-    console.rule('Setting up lock screen', style='checkt')
-    
-    #betterlockscreen
-    subprocess.run('wget https://raw.githubusercontent.com/betterlockscreen/betterlockscreen/main/install.sh -O - -q | sudo bash -s system', shell=True)
-    console.print('Betterlockscreen installed :heavy_check_mark:', style='ok')
-    logger.info('betterlockscreen Installed')
-
-    #i3lock-color 
-    dependencies =['autoconf', 'automake', 'cairo-devel', 'fontconfig', 'gcc', 'libev-devel', 'libjpeg-turbo-devel', 'libXinerama', 'libxkbcommon-devel', 'libxkbcommon-x11-devel', 'libXrandr', 'pam-devel', 'pkgconf', 'xcb-util-image-devel', 'xcb-util-xrm-devel']
-
-    console.print('Installing dependencies ', style='checkt')
-    for i in dependencies:
-        subprocess.check_call(f"dnf install -y {i}", shell=True, stdout=subprocess.DEVNULL)
-
-    subprocess.run('git clone https://github.com/Raymo111/i3lock-color.git', shell=True)
-    os.chdir('i3lock-color')
-    subprocess.run(['./install-i3lock-color.sh'])
-    console.print('i3lock-color installed :heavy_check_mark:', style='ok')
-    logger.info('i3lock-color Installed')
 
 if __name__ == '__main__':
     main()
