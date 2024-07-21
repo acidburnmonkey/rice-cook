@@ -56,9 +56,9 @@ def main():
 
     console.print('optimizing dnf.conf', style='ok')
     dnf_config()
-    
     install_programs_dnf()
     zsh_fonts()
+    hyprland()
 
 # Pass D or L to copy_dotfiles function
     while (True): 
@@ -104,6 +104,37 @@ def dnf_config():
     subprocess.run('dnf upgrade -y', shell=True)
     logger.info('Updated Dnf ')
 
+
+def hyprland():
+    
+    # create tty launcher
+    with open(home +'/.local/bin/wrappedhl', 'w+') as file:
+        file.write('''#!/bin/sh
+    cd ~
+    export _JAVA_AWT_WM_NONREPARENTING=1
+    export XCURSOR_SIZE=24
+    exec Hyprland ''')
+
+        file.seek(0)
+        for line in file:
+            line.strip()
+
+    # create .desktop file
+    with open('/usr/share/wayland-sessions/hyprland.desktop', 'w+') as file:
+        file.write('''[Desktop Entry]
+Name=Hyprland
+Comment=An intelligent dynamic tiling Wayland compositor
+Exec=$HOME/.local/bin/wrappedhl
+Type=Application ''')
+
+        file.seek(0)
+        for line in file:
+            line.strip()
+
+    #making them executable
+    subprocess.run(f'chmod +x {home}/.local/bin/wrappedhl', shell=True)
+    subprocess.run('chmod +x /usr/share/wayland-sessions/hyprland.desktop', shell=True)
+    
 
 # install programs dnfmax list i can pass to dnf of programs to install
 def install_programs_dnf():
@@ -183,17 +214,13 @@ def copy_dotfiles(setup):
     console.rule("Copying Dotfiles", style='checkt')
 
     # list of relevant configs
-    lis = list(next(os.walk('.'))[1])
+    lis = os.listdir()
+    exeptions = ['.git', 'desktop', '.bashrc','.zshrc']
+    
+    for z in exeptions:
+        if z in lis:
+            lis.remove(z)
 
-    lis.append('picom.conf')
-    if ('desktop' in lis):
-        lis.remove('desktop')
-    if ( '.git'in lis ):
-        lis.remove('.git')
-    if ('.bachrc' in lis):
-        lis.remove('.bashrc')
-    if ('.zshrc' in lis) :
-        lis.remove('.zshrc')
 
     dotfiles_dir = os.getcwd()
     destination = os.path.join(home,'.config')
