@@ -8,6 +8,7 @@ import os
 import re
 import subprocess
 import requests
+import shutil
 import logging
 import gdown
 from rich.console import Console
@@ -70,7 +71,8 @@ def main():
  
     executable_scripts()
     msic_configs()
-    
+    systemd()
+
     #correcting ownership
     # subprocess.run(f"chown -R {user}:{user} {os.path.join(home,'.config')}",shell=True ,stdout=subprocess.DEVNULL)
 
@@ -106,6 +108,8 @@ def dnf_config():
 
 
 def hyprland():
+
+    console.rule("Configuring hyprland", style='checkt')
     
     # create tty launcher
     with open(home +'/.local/bin/wrappedhl', 'w+') as file:
@@ -135,6 +139,9 @@ Type=Application ''')
     subprocess.run(f'chmod +x {home}/.local/bin/wrappedhl', shell=True)
     subprocess.run('chmod +x /usr/share/wayland-sessions/hyprland.desktop', shell=True)
     
+    logger.info('Created hyprland .desktop and wrappedhl')
+    console.print('Created hyprland .desktop and wrappedhl :heavy_check_mark:', style='ok')
+
 
 # install programs dnfmax list i can pass to dnf of programs to install
 def install_programs_dnf():
@@ -215,17 +222,18 @@ def copy_dotfiles(setup):
 
     # list of relevant configs
     lis = os.listdir()
-    exeptions = ['.git', 'desktop', '.bashrc','.zshrc']
+    exeptions = ['.git', 'desktop', '.bashrc','.zshrc','picom.conf', 'polybar'
+                 ,'i3','README.md','.gitignore','cinnamon-configs']
     
     for z in exeptions:
         if z in lis:
             lis.remove(z)
 
-
-    dotfiles_dir = os.getcwd()
     destination = os.path.join(home,'.config')
 
-    subprocess.run(f"cp -r {os.path.join(dotfiles_dir,'.zshrc')} {home}", shell=True)
+    shutil.copy2('.zshrc',home)
+    shutil.copy2('.p10k.zsh',home)
+    shutil.copy2('.vimrc',home)
 
     if (setup =='l'):
         console.print("Setting up dotfiles for Laptop", style='ok')
@@ -236,18 +244,13 @@ def copy_dotfiles(setup):
     elif (setup =='d'):
         console.print("Setting up dotfiles for Desktop", style='ok')
 
-        if ('i3' in lis):
-            lis.remove('i3')
-        if ('polybar' in lis):
-            lis.remove('polybar')
-        lis.append('desktop/i3')
-        lis.append('desktop/polybar')
         # copying files recusrsively
         for dir in lis:
             print(subprocess.run(f'cp -r {dir} {destination}', shell=True))
 
     console.print("Dotfiles copied :heavy_check_mark:", style='ok')
     logger.info('Dotfiles copied')
+
 
 def executable_scripts():
     console.rule('Making scripts executable', style='checkt')
@@ -261,6 +264,7 @@ def executable_scripts():
                     logging.critical(f"Error at executable_scripts: {str(e)}")    
     console.print("Job done :heavy_check_mark:", style='ok')
     logger.info('Made scripts in .config executable')
+
 
 def msic_configs():
     console.rule('Setting up final configs', style='checkt')
@@ -307,6 +311,21 @@ def msic_configs():
     except Exception as e:
         logging.critical(f"Could not get themes :{str(e)}")
         console.print("Error with Themes :X:", style='error')
+
+
+def systemd():
+    console.rule('Enabling user services', style='checkt')
+    
+    user_services = ['gnome-keyring.service', 'ssh-agent.service', 'polkit-gnome-authentication-agent.service', 
+                     'hypridle.service','gnome-keyring-daemon.service']
+    
+    try:
+        for services in user_services:
+            subprocess.run(f'systemctl --user enable {services}', shell=True)
+    except Exception as e:
+        logging.critical(f"Could not start service :{str(e)}")
+        console.print("Error starting some services :X:", style='error')
+
 
 
 if __name__ == '__main__':
