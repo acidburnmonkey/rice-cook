@@ -125,10 +125,10 @@ def hyprland():
 
     # create .desktop file
     with open('/usr/share/wayland-sessions/hyprland.desktop', 'w+') as file:
-        file.write('''[Desktop Entry]
+        file.write(f'''[Desktop Entry]
 Name=Hyprland
 Comment=An intelligent dynamic tiling Wayland compositor
-Exec=$HOME/.local/bin/wrappedhl
+Exec={home}/.local/bin/wrappedhl
 Type=Application ''')
 
         file.seek(0)
