@@ -1,12 +1,14 @@
+hyprland
 hyprcursor
 hypridle
-hyprland
 hyprlang
 hyprloc
 hyprpaper
 hyprpicker
 hyprutils
 xdg-desktop-portal-hyprland
+waybar
+wl-copy
 alacritty
 pip
 flatpak
@@ -23,7 +25,7 @@ kitty
 ranger
 gnome-software
 alsa-utils
-xclip
 rofi
 mozilla-openh
 nemo
+
