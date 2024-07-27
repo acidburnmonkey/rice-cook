@@ -4,20 +4,21 @@ This is a python script made to rice a blank fedora i3 install into my custom co
 # What is does :
 
 *  Allows DNF to update from fastest mirrors
- * Adds +10  max parallel downloads
-+ Adds rpmfusion  to repos
+    * Adds +10  max parallel downloads
+* Adds rpmfusion  to repos
 * Adds Flathub to repos
 * Copies dotfliles into ~/.config 
 </br> </br>
-* Installs :
+<span style="font-size:30px;">Installs:</span>
 *  Oh_My_zsh
 	* with zsh-autosuggestions plugin
 	* powerlevel10k plugin
 *  25 fonts, for developers and smooth looking
 *  Catppuccin themes
 * candy-icons
-*  [Betterlockscreen](https://github.com/betterlockscreen/betterlockscreen)
-* [i3lock-color](https://github.com/Raymo111/i3lock-color)
+* Hyrland
+* hyprcursor ,hypridle, hyprlang, hyprloc, hyprpaper, hyprpicker, hyprutils
+* Waybar
 * Finally installs all programs given in data.txt
  
 ________________________________________________________________________________
@@ -29,7 +30,7 @@ ________________________________________________________________________________
 <a href="https://github.com/EliverLara/candy-icons"><img src="./images/icons.png"  height="150" width="200"></a>
 
 ##
-![](images/a.png)
+![](images/image2.png)
 
 # How to run :
 ```
@@ -42,7 +43,8 @@ chmod +x preinstall.sh && sudo ./preinstall.sh
 ```
 sudo pip3 install -r requierements.txt
 ```
-### Now move rice-cook.py & data.txt into dofiles directry and run it:
+### Now move `rice-cook.py` & data.txt into dofiles directry and run it:
+
 ```
 sudo python3 rice-cook.py
 ```
