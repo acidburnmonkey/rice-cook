@@ -1,4 +1,4 @@
-# Rice-cook <a href="#"> <img src="./images/logo.webp" height="150"  style="border-radius: 50%;"> </a> 
+# Rice-cook <a href="#"> <img src="./images/logo.webp" height="150" > </a> 
 This is a python script made to rice a blank fedora i3 install into my custom configuration.
 
 # What is does :
