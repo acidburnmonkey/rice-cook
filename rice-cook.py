@@ -307,6 +307,18 @@ def msic_configs():
         console.print("Themes have been downloaded :heavy_check_mark:", style='ok')
         logger.info('Themes have been downloaded')
 
+        ## Set themes Gtk
+        subprocess.run("gsettings set org.gnome.desktop.interface icon-theme 'candy-icons'", shell=True)
+        subprocess.run("gsettings set org.gnome.desktop.interface gtk-theme 'Catppuccin-Macchiato-Standard-Blue-Dark'", shell=True)
+        subprocess.run("gsettings set org.gnome.desktop.interface font-name 'Roboto-Regular'", shell=True)
+        
+        #Flatpak force theme
+        subprocess.run("flatpak override --filesystem=$HOME/.themes", shell=True)
+        subprocess.run("flatpak override --env=GTK_THEME=Catppuccin-Macchiato-Standard-Blue-Dark", shell=True)
+        console.print("Themes have been Set :heavy_check_mark:", style='ok')
+        logger.info('Themes have been Set')
+
+
 
     except Exception as e:
         logging.critical(f"Could not get themes :{str(e)}")
