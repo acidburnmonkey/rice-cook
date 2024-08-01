@@ -28,4 +28,6 @@ alsa-utils
 rofi
 mozilla-openh
 nemo
-
+pamixer
+pavucontrol
+network-manager-applet
