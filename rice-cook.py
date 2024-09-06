@@ -74,7 +74,7 @@ def main():
     systemd()
 
     #correcting ownership
-    # subprocess.run(f"chown -R {user}:{user} {os.path.join(home,'.config')}",shell=True ,stdout=subprocess.DEVNULL)
+    subprocess.run(f"chown -R {user}:{user} {home}",shell=True ,stdout=subprocess.DEVNULL)
 
     
 
@@ -318,11 +318,23 @@ def msic_configs():
         console.print("Themes have been Set :heavy_check_mark:", style='ok')
         logger.info('Themes have been Set')
 
-
-
     except Exception as e:
         logging.critical(f"Could not get themes :{str(e)}")
         console.print("Error with Themes :X:", style='error')
+    
+    # codec and multmedia
+    try:
+        subprocess.run('dnf swap ffmpeg-free ffmpeg --allowerasing', shell=True)
+        subprocess.run('dnf update @multimedia --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin', shell=True)
+        subprocess.run(' dnf update @sound-and-video', shell=True)
+
+        console.print("ffmpeg non free installed + all codecs :heavy_check_mark:", style='ok')
+        logger.info('ffmpeg non free installed + all codecs ')
+    
+    except Exception as e:
+        logging.critical(f"Could not install codecs :{str(e)}")
+        console.print("Something failed with new codecs :X:", style='error')
+
 
 
 def systemd():
