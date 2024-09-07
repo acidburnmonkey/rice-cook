@@ -1,5 +1,5 @@
 # Rice-cook <a href="#"> <img src="./images/logo.webp" height="150" > </a> 
-This is a python script made to rice a blank fedora i3 install into my custom configuration.
+This is a python script made to rice a blank fedora install into my custom hyprland configuration.
 
 # What is does :
 
