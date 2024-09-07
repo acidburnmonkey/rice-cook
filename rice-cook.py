@@ -110,7 +110,9 @@ def dnf_config():
 def hyprland():
 
     console.rule("Configuring hyprland", style='checkt')
-    
+    if not os.path.exists(home +'/.local/bin'):
+        os.mkdir(home +'/.local/bin')
+
     # create tty launcher
     with open(home +'/.local/bin/wrappedhl', 'w+') as file:
         file.write('''#!/bin/sh
