@@ -281,12 +281,8 @@ def msic_configs():
 
     os.chdir(os.path.join(current_dir,'misic'))
 
-    #### Fonts 
-    # https://drive.google.com/drive/folders/1BciF4x3_K3T8p1Y17lHn_xWXnSAZpvDE
-    fonts_url = 'https://drive.google.com/uc?id=1jebIzgH9BLLn7Ou3xOnSiIj2unIdyXFI'
-    output ='fonts-c.zip' 
-    gdown.download(fonts_url,output, quiet=False)
-    subprocess.run(f"unzip {output} -d {os.path.join(home,'.fonts')}",stdout=subprocess.DEVNULL ,shell=True)
+    subprocess.check_call('git clone https://github.com/acidburnmonkey/fonts.git', shell=True)
+    shutil.copytree('./fonts/', os.path.join(home,'.fonts'))
     subprocess.run("fc-cache -f",stdout=subprocess.DEVNULL ,shell=True)
 
     console.print("Fonts downloaded :heavy_check_mark:", style='ok')
