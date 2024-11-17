@@ -11,6 +11,7 @@ import requests
 import shutil
 import logging
 import gdown
+from git import Repo
 from rich.console import Console
 from rich.theme import Theme
 
@@ -274,16 +275,18 @@ def msic_configs():
     current_dir = os.getcwd()
     try :
         os.mkdir('misic')
-        os.mkdir(os.path.join(home,'.fonts'))
         os.mkdir(os.path.join(home,'.themes'))
     except FileExistsError:
         pass
 
     os.chdir(os.path.join(current_dir,'misic'))
 
-    subprocess.check_call('git clone https://github.com/acidburnmonkey/fonts.git', shell=True)
-    shutil.copytree('./fonts/', os.path.join(home,'.fonts'))
-    subprocess.run("fc-cache -f",stdout=subprocess.DEVNULL ,shell=True)
+    fonts_url = "https://github.com/acidburnmonkey/fonts"
+    fonts_dir = os.path.join(home,".fonts")
+    try:
+        Repo.clone_from(fonts_url, fonts_dir)
+    except Exception as e:
+        print(f"Failed to clone repository: {e}")
 
     console.print("Fonts downloaded :heavy_check_mark:", style='ok')
     logger.info('Fonts donwloaded ')
