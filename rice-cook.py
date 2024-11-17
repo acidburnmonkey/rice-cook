@@ -225,8 +225,8 @@ def copy_dotfiles(setup):
 
     # list of relevant configs
     lis = os.listdir()
-    exeptions = ['.git', 'desktop', '.bashrc','.zshrc','picom.conf', 'polybar','data.txt'
-                 ,'i3','README.md','.gitignore','cinnamon-configs','Laptop-configs']
+    exeptions = ['.git', '.bashrc','.zshrc','retired','data.txt','wrappedhl','Hyprland','install.sh',
+                 'logg.log','README.md','.gitignore','rice-cook.py','wrappedhl','Laptop-configs']
     
     for z in exeptions:
         if z in lis:
