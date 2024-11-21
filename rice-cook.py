@@ -61,7 +61,9 @@ def main():
     install_programs_dnf()
     zsh_fonts()
     hyprland()
-
+    msic_configs()
+    
+    #This should not need sudo
 # Pass D or L to copy_dotfiles function
     while (True): 
         console.print('Set up dotfiles for Desktop (D) or Laptop  (L) ?', style='promp')
@@ -71,7 +73,6 @@ def main():
             break
  
     executable_scripts()
-    msic_configs()
     systemd()
 
     #correcting ownership
@@ -268,7 +269,7 @@ def executable_scripts():
     console.print("Job done :heavy_check_mark:", style='ok')
     logger.info('Made scripts in .config executable')
 
-
+#need sudo
 def msic_configs():
     console.rule('Setting up final configs', style='checkt')
 
@@ -287,6 +288,9 @@ def msic_configs():
         Repo.clone_from(fonts_url, fonts_dir)
     except Exception as e:
         print(f"Failed to clone repository: {e}")
+    
+    # to system 
+    shutil.copytree(home+"/.fonts",'/usr/share/fonts/', dirs_exist_ok=True)
 
     console.print("Fonts downloaded :heavy_check_mark:", style='ok')
     logger.info('Fonts donwloaded ')
@@ -304,6 +308,9 @@ def msic_configs():
             output = str(index)+'.zip' 
             gdown.download(file, output ,quiet=False)
             subprocess.run(f"unzip {output} -d {os.path.join(home,'.themes')}", shell=True, stdout=subprocess.DEVNULL)
+
+        # to system 
+        shutil.copytree(home+"/.themes",'/usr/share/themes/', dirs_exist_ok=True)
 
         console.print("Themes have been downloaded :heavy_check_mark:", style='ok')
         logger.info('Themes have been downloaded')
@@ -327,7 +334,7 @@ def msic_configs():
     try:
         subprocess.run('dnf swap ffmpeg-free ffmpeg --allowerasing', shell=True)
         subprocess.run('dnf update @multimedia --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin', shell=True)
-        subprocess.run(' dnf update @sound-and-video', shell=True)
+        subprocess.run('dnf update @sound-and-video', shell=True)
 
         console.print("ffmpeg non free installed + all codecs :heavy_check_mark:", style='ok')
         logger.info('ffmpeg non free installed + all codecs ')
