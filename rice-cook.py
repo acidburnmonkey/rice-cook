@@ -147,17 +147,48 @@ Type=Application ''')
     console.print('Created hyprland .desktop and wrappedhl :heavy_check_mark:', style='ok')
 
 
-# install programs dnfmax list i can pass to dnf of programs to install
+# install programs dnf
 def install_programs_dnf():
     console.rule("Installing All Programs DNF ", style='checkt')
 
     programs =[]
-    with open("data.txt", 'r') as file:
-        for line in file:
-            programs.append(line.strip())
+    others = []
+    flatpaks= []
 
-#for some reason they have to be passed to dnf individually 
-# instead of unpacked list *programs
+    with open("data.config", 'r') as file:
+        lines = file.readlines()
+
+        # Variables to store line numbers of headers
+        main_index = 0
+        others_index = 0
+        flatpak_index = 0
+
+        # Find the line numbers of headers
+        for index, line in enumerate(lines):
+            if '[Main]' in line:
+                main_index = index
+            elif '[other-programs]' in line:
+                others_index = index
+            elif '[Flatpak]' in line:
+                flatpak_index = index
+        
+        file.seek(0)
+        for index,line in enumerate(file):
+            #empty strings
+            if not line.strip():
+                continue
+            elif index < others_index and ('[' not in line):
+                programs.append(line.strip())
+            elif index > others_index and index < flatpak_index:
+                others.append(line.strip())
+            elif index > flatpak_index:
+                flatpaks.append(line.strip())
+            elif '[' in line.strip():
+                   continue
+
+    #for some reason they have to be passed to dnf individually 
+    # instead of unpacked list *programs
+    programs.extend(others)    
     for program in programs: 
         try:
             subprocess.run(f'dnf install -y {program} ', shell=True)
@@ -165,7 +196,14 @@ def install_programs_dnf():
             console.print(Exception(),":x:" , style='error')
             logging.critical(f"Error at Installing programs: {str(e)}")    
 
-    logger.info('Installed programs in data.txt')
+    for fp in flatpaks: 
+        try:
+            subprocess.run(f'flatpak install flathub -y {fp}', shell=True)
+        except Exception as e:
+            console.print(Exception(),":x:" , style='error')
+            logging.critical(f"Error at Installing flatpaks: {str(e)}")    
+
+    logger.info('Installed programs in data.config')
 
 
 ## checks for sudo 

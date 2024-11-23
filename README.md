@@ -19,7 +19,7 @@ This is a python script made to rice a blank fedora install into my custom hyprl
 * Hyrland
 * hyprcursor ,hypridle, hyprlang, hyprloc, hyprpaper, hyprpicker, hyprutils
 * Waybar
-* Finally installs all programs given in data.txt
+* Finally installs all programs given in data.config
  
 ________________________________________________________________________________
 
@@ -54,7 +54,7 @@ Should look like this .
 |---nvim
 |---ranger
 |---etc...
-|---data.txt
+|---data.config
 |---rice-cook.py
 ```
 
