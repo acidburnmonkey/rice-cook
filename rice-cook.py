@@ -264,8 +264,8 @@ def copy_dotfiles(setup):
 
     # list of relevant configs
     lis = os.listdir()
-    exeptions = ['.git', '.bashrc','.zshrc','retired','data.txt','wrappedhl','Hyprland','install.sh',
-                 'logg.log','README.md','.gitignore','rice-cook.py','wrappedhl','Laptop-configs']
+    exeptions = ['.git', '.bashrc','.zshrc','retired','data.config','wrappedhl','Hyprland','install.sh',
+                 'logg.log','README.md','.gitignore','rice-cook.py','Laptop-configs','.ideavimrc']
     
     for z in exeptions:
         if z in lis:
@@ -276,6 +276,7 @@ def copy_dotfiles(setup):
     shutil.copy2('.zshrc',home)
     shutil.copy2('.p10k.zsh',home)
     shutil.copy2('.vimrc',home)
+    shutil.copy2('.ideavimrc',home)
 
     if (setup =='l'):
         console.print("Setting up dotfiles for Laptop", style='ok')

@@ -57,6 +57,11 @@ Should look like this .
 |---data.config
 |---rice-cook.py
 ```
+### Before reboot
+Need to correct ownership of home directory 
+```
+sudo chown -R user:user ~/home/username
+```
 
 ## Donate
 <a href="https://www.buymeacoffee.com/acidburn" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
