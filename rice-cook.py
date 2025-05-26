@@ -1,6 +1,6 @@
 #!/bin/python3
 
-# Program Shoud run with sudo -HE 
+# Program Shoud run with sudo -HE
 # https://github.com/acidburnmonkey
 #
 
@@ -14,6 +14,8 @@ import gdown
 from git import Repo
 from rich.console import Console
 from rich.theme import Theme
+from slimParser import SlimParser
+import slimParser
 
 # pylint: disable=subprocess-run-check
 # pylint: disable=broad-exception-caught
@@ -34,7 +36,7 @@ logging.basicConfig(
 ap_theme = Theme({'ok':'green', 'error':'red', 'checkt':'bold cyan','promp':'orange1'})
 console = Console(theme=ap_theme)
 
-user = os.getlogin() 
+user = os.getlogin()
 home = os.path.join('/home',user)
 
 
@@ -43,9 +45,9 @@ def main():
     setup = ''
     # confirm_user =''
     local_user = user
-    
+
     sudo_check()
-    
+
     console.print(f"Setting up for user {local_user} ", style='promp')
     # while(True):
     #     confirm_user = input(" y/n ")
@@ -62,23 +64,23 @@ def main():
     zsh_fonts()
     hyprland()
     msic_configs()
-    
+
     #This should not need sudo
 # Pass D or L to copy_dotfiles function
-    while (True): 
+    while (True):
         console.print('Set up dotfiles for Desktop (D) or Laptop  (L) ?', style='promp')
         setup = input('>').lower()
         if setup == 'l' or setup == 'd':
             copy_dotfiles(setup)
             break
- 
+
     executable_scripts()
     systemd()
 
     #correcting ownership
     subprocess.run(f"chown -R {user}:{user} {home}",shell=True ,stdout=subprocess.DEVNULL)
 
-    
+
 
 ################
 # END OF MAIN #
@@ -89,7 +91,7 @@ def dnf_config():
 
     # dnf conf
     with open('/etc/dnf/dnf.conf' , 'r+') as f:
-        text = 'max_parallel_downloads=10 \nfastestmirror=true' 
+        text = 'max_parallel_downloads=10 \nfastestmirror=true'
         match = re.search(r'(max_parallel_downloads=10)', f.read())
         if not match:
             with open('/etc/dnf/dnf.conf', 'a+') as f:
@@ -99,12 +101,12 @@ def dnf_config():
         else:
             console.print(' dnf.conf already optimized :heavy_check_mark:', style='checkt')
 
-    subprocess.check_call('sudo dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm',stdout=subprocess.DEVNULL,  shell=True)  
+    subprocess.check_call('sudo dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm',stdout=subprocess.DEVNULL,  shell=True)
     subprocess.check_call('sudo dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm',stdout=subprocess.DEVNULL, shell=True)
     console.print('rpmfusion added to repos :heavy_check_mark:', style='ok')
     logger.info('rpmfusion added to repos')
-    
-    #update Dnf 
+
+    #update Dnf
     subprocess.run('dnf upgrade -y', shell=True)
     logger.info('Updated Dnf ')
 
@@ -142,7 +144,7 @@ Type=Application ''')
     #making them executable
     subprocess.run(f'chmod +x {home}/.local/bin/wrappedhl', shell=True)
     subprocess.run('chmod +x /usr/share/wayland-sessions/hyprland.desktop', shell=True)
-    
+
     logger.info('Created hyprland .desktop and wrappedhl')
     console.print('Created hyprland .desktop and wrappedhl :heavy_check_mark:', style='ok')
 
@@ -151,62 +153,46 @@ Type=Application ''')
 def install_programs_dnf():
     console.rule("Installing All Programs DNF ", style='checkt')
 
-    programs =[]
-    others = []
-    flatpaks= []
+    parser = SlimParser('data.conf')
+    parser.cleanAll()
 
-    with open("data.config", 'r') as file:
-        lines = file.readlines()
+    repos = parser.get('Repolist')
+    main = parser.get('Main')
+    programs = parser.get('Programs')
+    flatpaks= parser.get('Flatpak')
+    copr = parser.get('Copr')
 
-        # Variables to store line numbers of headers
-        main_index = 0
-        others_index = 0
-        flatpak_index = 0
 
-        # Find the line numbers of headers
-        for index, line in enumerate(lines):
-            if '[Main]' in line:
-                main_index = index
-            elif '[other-programs]' in line:
-                others_index = index
-            elif '[Flatpak]' in line:
-                flatpak_index = index
-        
-        file.seek(0)
-        for index,line in enumerate(file):
-            #empty strings
-            if not line.strip():
-                continue
-            elif index < others_index and ('[' not in line):
-                programs.append(line.strip())
-            elif index > others_index and index < flatpak_index:
-                others.append(line.strip())
-            elif index > flatpak_index:
-                flatpaks.append(line.strip())
-            elif '[' in line.strip():
-                   continue
+    #try to add repos
+    if repos:
+        for url in repos:
+            try:
+                subprocess.run(f'dnf config-manager addrepo --from-repofile={url}')
+            except Exception as e:
+                console.print(Exception(),":x:" , style='error')
+                logging.critical(f"Error at Installing programs: {str(e)}")
 
-    #for some reason they have to be passed to dnf individually 
+    #for some reason they have to be passed to dnf individually
     # instead of unpacked list *programs
-    programs.extend(others)    
-    for program in programs: 
+    main.extend(programs)
+    for program in main:
         try:
             subprocess.run(f'dnf install -y {program} ', shell=True)
         except Exception as e:
             console.print(Exception(),":x:" , style='error')
-            logging.critical(f"Error at Installing programs: {str(e)}")    
+            logging.critical(f"Error at Installing programs: {str(e)}")
 
-    for fp in flatpaks: 
+    for fp in flatpaks:
         try:
             subprocess.run(f'flatpak install flathub -y {fp}', shell=True)
         except Exception as e:
             console.print(Exception(),":x:" , style='error')
-            logging.critical(f"Error at Installing flatpaks: {str(e)}")    
+            logging.critical(f"Error at Installing flatpaks: {str(e)}")
 
     logger.info('Installed programs in data.config')
 
 
-## checks for sudo 
+## checks for sudo
 def sudo_check():
     sudo_user = os.getenv("SUDO_USER")
     if sudo_user is None:
@@ -215,10 +201,10 @@ def sudo_check():
     else:
         console.print('ok :heavy_check_mark:', style='ok')
 
-# Oh my zsh setup + flathub 
+# Oh my zsh setup + flathub
 def zsh_fonts():
     console.rule("Installing Zsh fonts", style='checkt')
-    
+
     try:
         console.print("installing oh my zsh ", style='ok')
 
@@ -226,8 +212,8 @@ def zsh_fonts():
         ohmy_url = "https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
         zsh_installer = requests.get(ohmy_url, timeout=10)
         open('install.sh', 'wb').write(zsh_installer.content)
-        
-        #removing exec line 
+
+        #removing exec line
         with open('install.sh', 'r') as f:
             contents = f.read()
         pattern = r'^\s*exec zsh -l$'
@@ -258,7 +244,7 @@ def zsh_fonts():
     subprocess.run('flatpak remote-add --if-not-exists flathub https://flatInstalled programs in data.txthub.org/repo/flathub.flatpakrepo', shell=True, stdout=subprocess.DEVNULL)
     logger.info('Installed  Flathub')
 
-# copy and override dotfiles 
+# copy and override dotfiles
 def copy_dotfiles(setup):
     console.rule("Copying Dotfiles", style='checkt')
 
@@ -266,7 +252,7 @@ def copy_dotfiles(setup):
     lis = os.listdir()
     exeptions = ['.git', '.bashrc','.zshrc','retired','data.config','wrappedhl','Hyprland','install.sh',
                  'logg.log','README.md','.gitignore','rice-cook.py','Laptop-configs','.ideavimrc']
-    
+
     for z in exeptions:
         if z in lis:
             lis.remove(z)
@@ -283,7 +269,7 @@ def copy_dotfiles(setup):
         # copying files recusrsively
         for dir in lis:
             print(subprocess.run(f'cp -r {dir} {destination}', shell=True))
-    
+
     elif (setup =='d'):
         console.print("Setting up dotfiles for Desktop", style='ok')
 
@@ -302,9 +288,9 @@ def executable_scripts():
         for element in files:
             if '.sh' in element or '.py' in element:
                 try:
-                    subprocess.run(f"chmod +x {os.path.join(root,element)}", shell=True) 
+                    subprocess.run(f"chmod +x {os.path.join(root,element)}", shell=True)
                 except Exception as e:
-                    logging.critical(f"Error at executable_scripts: {str(e)}")    
+                    logging.critical(f"Error at executable_scripts: {str(e)}")
     console.print("Job done :heavy_check_mark:", style='ok')
     logger.info('Made scripts in .config executable')
 
@@ -327,28 +313,28 @@ def msic_configs():
         Repo.clone_from(fonts_url, fonts_dir)
     except Exception as e:
         print(f"Failed to clone repository: {e}")
-    
-    # to system 
+
+    # to system
     shutil.copytree(home+"/.fonts",'/usr/share/fonts/', dirs_exist_ok=True)
 
     console.print("Fonts downloaded :heavy_check_mark:", style='ok')
     logger.info('Fonts donwloaded ')
 
-    #Icons 
+    #Icons
     subprocess.run('git clone --depth 1 https://github.com/EliverLara/candy-icons.git /usr/share/icons/candy-icons', shell=True, stdout=subprocess.DEVNULL)
     console.print("Icons have been downloaded :heavy_check_mark:", style='ok')
     logger.info('candy-icons downloaded')
 
     try:
-        themes_urls =['https://drive.google.com/uc?id=1KkqC5vaBjePSHxjBI_8PWfm3jNW5gO7k','https://drive.google.com/uc?id=1-qq3wmuQhkKHpW_8OrRNS92AHD9LE4un' 
+        themes_urls =['https://drive.google.com/uc?id=1KkqC5vaBjePSHxjBI_8PWfm3jNW5gO7k','https://drive.google.com/uc?id=1-qq3wmuQhkKHpW_8OrRNS92AHD9LE4un'
                               ,'https://drive.google.com/uc?id=1mxkN9b4Ws7CeqF_KaTlA3dA5e75UUa4y','https://drive.google.com/uc?id=1cYLRsxmWeQJMOS7QEGEgJenRPKxgwN7X']
 
         for index,file in enumerate(themes_urls):
-            output = str(index)+'.zip' 
+            output = str(index)+'.zip'
             gdown.download(file, output ,quiet=False)
             subprocess.run(f"unzip {output} -d {os.path.join(home,'.themes')}", shell=True, stdout=subprocess.DEVNULL)
 
-        # to system 
+        # to system
         shutil.copytree(home+"/.themes",'/usr/share/themes/', dirs_exist_ok=True)
 
         console.print("Themes have been downloaded :heavy_check_mark:", style='ok')
@@ -358,7 +344,7 @@ def msic_configs():
         subprocess.run("gsettings set org.gnome.desktop.interface icon-theme 'candy-icons'", shell=True)
         subprocess.run("gsettings set org.gnome.desktop.interface gtk-theme 'Catppuccin-Macchiato-Standard-Blue-Dark'", shell=True)
         subprocess.run("gsettings set org.gnome.desktop.interface font-name 'Roboto-Regular'", shell=True)
-        
+
         #Flatpak force theme
         subprocess.run("flatpak override --filesystem=$HOME/.themes", shell=True)
         subprocess.run("flatpak override --env=GTK_THEME=Catppuccin-Macchiato-Standard-Blue-Dark", shell=True)
@@ -368,7 +354,7 @@ def msic_configs():
     except Exception as e:
         logging.critical(f"Could not get themes :{str(e)}")
         console.print("Error with Themes :X:", style='error')
-    
+
     # codec and multmedia
     try:
         subprocess.run('dnf swap ffmpeg-free ffmpeg --allowerasing', shell=True)
@@ -377,7 +363,7 @@ def msic_configs():
 
         console.print("ffmpeg non free installed + all codecs :heavy_check_mark:", style='ok')
         logger.info('ffmpeg non free installed + all codecs ')
-    
+
     except Exception as e:
         logging.critical(f"Could not install codecs :{str(e)}")
         console.print("Something failed with new codecs :X:", style='error')
@@ -386,10 +372,10 @@ def msic_configs():
 
 def systemd():
     console.rule('Enabling user services', style='checkt')
-    
-    user_services = ['gnome-keyring.service', 'ssh-agent.service', 'polkit-gnome-authentication-agent.service', 
+
+    user_services = ['gnome-keyring.service', 'ssh-agent.service', 'polkit-gnome-authentication-agent.service',
                      'hypridle.service','gnome-keyring-daemon.service']
-    
+
     try:
         for services in user_services:
             subprocess.run(f'systemctl --user enable {services}', shell=True)
