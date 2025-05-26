@@ -170,7 +170,15 @@ def install_programs_dnf():
                 subprocess.run(f'dnf config-manager addrepo --from-repofile={url}')
             except Exception as e:
                 console.print(Exception(),":x:" , style='error')
-                logging.critical(f"Error at Installing programs: {str(e)}")
+                logging.critical(f"Error adding extra repos: {str(e)}")
+
+    if copr:
+        for id in copr:
+            try:
+                subprocess.run(f'sudo dnf copr enable {id}')
+            except Exception as e:
+                console.print(Exception(),":x:" , style='error')
+                logging.critical(f"Err adding Copr: {str(e)}")
 
     #for some reason they have to be passed to dnf individually
     # instead of unpacked list *programs
