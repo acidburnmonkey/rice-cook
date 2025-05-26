@@ -1,6 +1,6 @@
 #!/bin/python3
 
-# Program Shoud run with sudo -HE
+# Program Should run with sudo -HE
 # https://github.com/acidburnmonkey
 #
 
@@ -15,7 +15,6 @@ from git import Repo
 from rich.console import Console
 from rich.theme import Theme
 from slimParser import SlimParser
-import slimParser
 
 # pylint: disable=subprocess-run-check
 # pylint: disable=broad-exception-caught
@@ -23,9 +22,9 @@ import slimParser
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-formater = logging.Formatter("%(asctime)s | %(levelno)s | %(funcName)s| %(message)s")
+formatter = logging.Formatter("%(asctime)s | %(levelno)s | %(funcName)s| %(message)s")
 f_handler = logging.FileHandler('logg.log')
-f_handler.setFormatter(formater)
+f_handler.setFormatter(formatter)
 logger.addHandler(f_handler)
 
 logging.basicConfig(
@@ -33,7 +32,7 @@ logging.basicConfig(
         filename='logg.log', level=logging.WARNING
         )
 
-ap_theme = Theme({'ok':'green', 'error':'red', 'checkt':'bold cyan','promp':'orange1'})
+ap_theme = Theme({'ok':'green', 'error':'red', 'checked':'bold cyan','rule':'orange1'})
 console = Console(theme=ap_theme)
 
 user = os.getlogin()
@@ -48,7 +47,7 @@ def main():
 
     sudo_check()
 
-    console.print(f"Setting up for user {local_user} ", style='promp')
+    console.print(f"Setting up for user {local_user} ", style='rule')
     # while(True):
     #     confirm_user = input(" y/n ")
     #     if (confirm_user.lower() == 'n'):
@@ -68,7 +67,7 @@ def main():
     #This should not need sudo
 # Pass D or L to copy_dotfiles function
     while (True):
-        console.print('Set up dotfiles for Desktop (D) or Laptop  (L) ?', style='promp')
+        console.print('Set up dotfiles for Desktop (D) or Laptop  (L) ?', style='rule')
         setup = input('>').lower()
         if setup == 'l' or setup == 'd':
             copy_dotfiles(setup)
@@ -87,7 +86,7 @@ def main():
 ################
 
 def dnf_config():
-    console.rule("Configuring dnf", style='checkt')
+    console.rule("Configuring dnf", style='checked')
 
     # dnf conf
     with open('/etc/dnf/dnf.conf' , 'r+') as f:
@@ -99,7 +98,7 @@ def dnf_config():
                 console.print(' changes made to dnf_config :heavy_check_mark:', style='ok')
             logger.info('changes made to dnf_config')
         else:
-            console.print(' dnf.conf already optimized :heavy_check_mark:', style='checkt')
+            console.print(' dnf.conf already optimized :heavy_check_mark:', style='checked')
 
     subprocess.check_call('sudo dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm',stdout=subprocess.DEVNULL,  shell=True)
     subprocess.check_call('sudo dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm',stdout=subprocess.DEVNULL, shell=True)
@@ -113,7 +112,7 @@ def dnf_config():
 
 def hyprland():
 
-    console.rule("Configuring hyprland", style='checkt')
+    console.rule("Configuring hyprland", style='checked')
     if not os.path.exists(home +'/.local/bin'):
         os.mkdir(home +'/.local/bin')
 
@@ -151,7 +150,7 @@ Type=Application ''')
 
 # install programs dnf
 def install_programs_dnf():
-    console.rule("Installing All Programs DNF ", style='checkt')
+    console.rule("Installing All Programs DNF ", style='checked')
 
     parser = SlimParser('data.conf')
     parser.cleanAll()
@@ -167,7 +166,7 @@ def install_programs_dnf():
     if repos:
         for url in repos:
             try:
-                subprocess.run(f'dnf config-manager addrepo --from-repofile={url}')
+                subprocess.run(f'sudo dnf config-manager addrepo --from-repofile={url}', shell=True)
             except Exception as e:
                 console.print(Exception(),":x:" , style='error')
                 logging.critical(f"Error adding extra repos: {str(e)}")
@@ -175,7 +174,7 @@ def install_programs_dnf():
     if copr:
         for id in copr:
             try:
-                subprocess.run(f'sudo dnf copr enable {id}')
+                subprocess.run(f'sudo dnf copr enable -y {id}',shell=True)
             except Exception as e:
                 console.print(Exception(),":x:" , style='error')
                 logging.critical(f"Err adding Copr: {str(e)}")
@@ -211,7 +210,7 @@ def sudo_check():
 
 # Oh my zsh setup + flathub
 def zsh_fonts():
-    console.rule("Installing Zsh fonts", style='checkt')
+    console.rule("Installing Zsh fonts", style='checked')
 
     try:
         console.print("installing oh my zsh ", style='ok')
@@ -234,8 +233,8 @@ def zsh_fonts():
         subprocess.run('chmod +x install.sh ', stdout=subprocess.DEVNULL, shell=True, check=True)
         subprocess.run(f'sudo -u {user} ./install.sh', shell=True, check=True)
 
-        console.print("installing oh my zsh auto sugestions ", style='ok')
-        # zsh auto sugestions
+        console.print("installing oh my zsh auto suggestions ", style='ok')
+        # zsh auto suggestions
         subprocess.run(f'git clone https://github.com/zsh-users/zsh-autosuggestions {home}/.oh-my-zsh/custom/plugins/zsh-autosuggestions', shell=True)
 
         console.print("installing powerlevel10k ", style='ok')
@@ -254,14 +253,14 @@ def zsh_fonts():
 
 # copy and override dotfiles
 def copy_dotfiles(setup):
-    console.rule("Copying Dotfiles", style='checkt')
+    console.rule("Copying Dotfiles", style='checked')
 
     # list of relevant configs
     lis = os.listdir()
-    exeptions = ['.git', '.bashrc','.zshrc','retired','data.config','wrappedhl','Hyprland','install.sh',
+    exceptions = ['.git', '.bashrc','.zshrc','retired','data.conf','wrappedhl','Hyprland','install.sh',
                  'logg.log','README.md','.gitignore','rice-cook.py','Laptop-configs','.ideavimrc']
 
-    for z in exeptions:
+    for z in exceptions:
         if z in lis:
             lis.remove(z)
 
@@ -274,14 +273,14 @@ def copy_dotfiles(setup):
 
     if (setup =='l'):
         console.print("Setting up dotfiles for Laptop", style='ok')
-        # copying files recusrsively
+        # copying files recursively
         for dir in lis:
             print(subprocess.run(f'cp -r {dir} {destination}', shell=True))
 
     elif (setup =='d'):
         console.print("Setting up dotfiles for Desktop", style='ok')
 
-        # copying files recusrsively
+        # copying files recursively
         for dir in lis:
             print(subprocess.run(f'cp -r {dir} {destination}', shell=True))
 
@@ -290,7 +289,7 @@ def copy_dotfiles(setup):
 
 
 def executable_scripts():
-    console.rule('Making scripts executable', style='checkt')
+    console.rule('Making scripts executable', style='checked')
 
     for root ,_,files in os.walk(os.path.join(home,'.config')):
         for element in files:
@@ -304,7 +303,7 @@ def executable_scripts():
 
 #need sudo
 def msic_configs():
-    console.rule('Setting up final configs', style='checkt')
+    console.rule('Setting up final configs', style='checked')
 
     current_dir = os.getcwd()
     try :
@@ -326,7 +325,7 @@ def msic_configs():
     shutil.copytree(home+"/.fonts",'/usr/share/fonts/', dirs_exist_ok=True)
 
     console.print("Fonts downloaded :heavy_check_mark:", style='ok')
-    logger.info('Fonts donwloaded ')
+    logger.info('Fonts downloaded ')
 
     #Icons
     subprocess.run('git clone --depth 1 https://github.com/EliverLara/candy-icons.git /usr/share/icons/candy-icons', shell=True, stdout=subprocess.DEVNULL)
@@ -363,7 +362,7 @@ def msic_configs():
         logging.critical(f"Could not get themes :{str(e)}")
         console.print("Error with Themes :X:", style='error')
 
-    # codec and multmedia
+    # codec and multimedia
     try:
         subprocess.run('dnf swap ffmpeg-free ffmpeg --allowerasing', shell=True)
         subprocess.run('dnf update @multimedia --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin', shell=True)
@@ -379,7 +378,7 @@ def msic_configs():
 
 
 def systemd():
-    console.rule('Enabling user services', style='checkt')
+    console.rule('Enabling user services', style='checked')
 
     user_services = ['gnome-keyring.service', 'ssh-agent.service', 'polkit-gnome-authentication-agent.service',
                      'hypridle.service','gnome-keyring-daemon.service']
