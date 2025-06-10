@@ -17,7 +17,7 @@ This is a python script made to rice a blank fedora install into my custom hyprl
 - 25 fonts, for developers and smooth looking
 - Catppuccin themes
 - candy-icons
-- Hyrland
+- Hyprland
 - hyprcursor ,hypridle, hyprlang, hyprloc, hyprpaper, hyprpicker, hyprutils
 - Waybar
 - Finally installs all programs given in data.conf
@@ -67,7 +67,7 @@ Should look like this .
 Need to correct ownership of home directory
 
 ```
-sudo chown -R user:user ~/home/username
+sudo chown -R user:user /home/username
 ```
 
 ## A snapshot of your current fedora config can be genereted with this script
