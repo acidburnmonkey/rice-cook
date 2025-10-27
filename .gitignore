@@ -2,4 +2,5 @@ project_vnv
 build
 dist
 rice-cook.spec
-
+__pycache__
+test.py
