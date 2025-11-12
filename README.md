@@ -45,7 +45,7 @@ git clone https://github.com/acidburnmonkey/rice-cook.git && cd rice-cook
 chmod +x preinstall.sh && sudo ./preinstall.sh
 ```
 
-### Now move `rice-cook.py` & data.conf into dofiles directory and run it:
+### copy dotfiles directory into this project
 
 ```
 sudo uv run rice-cook.py
@@ -54,12 +54,12 @@ sudo uv run rice-cook.py
 Should look like this .
 
 ```
-|-dotfiles
-|---nvim
-|---ranger
-|---etc...
-|---data.conf
-|---rice-cook.py
+|-rice-cook.py
+|-data.conf
+|---dotfiles
+|-----nvim
+|-----ranger
+|-----etc...
 ```
 
 ### Before reboot
@@ -70,7 +70,7 @@ Need to correct ownership of home directory
 sudo chown -R user:user /home/username
 ```
 
-## A snapshot of your current fedora config can be genereted with this script
+## A snapshot of your current fedora config can be generated with this script
 
 [link](https://github.com/acidburnmonkey/scripts/blob/main/fedora-apps.py)
 

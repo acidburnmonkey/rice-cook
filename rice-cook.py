@@ -55,12 +55,16 @@ def main():
 
     # This should not need sudo
     # Pass D or L to copy_dotfiles function
-    while True:
-        console.print('Set up dotfiles for Desktop (D) or Laptop  (L) ?', style='rule')
-        setup = input('>').lower()
-        if setup == 'l' or setup == 'd':
-            copy_dotfiles(setup)
-            break
+
+    if os.path.exists('dotfiles'):
+        while True:
+            console.print('Set up dotfiles for Desktop (D) or Laptop  (L) ?', style='rule')
+            setup = input('>').lower()
+            if setup == 'l' or setup == 'd':
+                copy_dotfiles(setup)
+                break
+    else:
+        console.print('Dotfiles not found skipping...', style='error')
 
     executable_scripts()
     systemd()
@@ -263,11 +267,8 @@ def copy_dotfiles(setup):
     console.rule("Copying Dotfiles", style='checked')
 
     # list of relevant configs
-    lis = os.listdir()
+    lis = os.listdir('dotfiles')
     exceptions = [
-        '.git',
-        '.bashrc',
-        '.zshrc',
         'retired',
         'data.conf',
         'wrappedhl',
@@ -275,22 +276,23 @@ def copy_dotfiles(setup):
         'install.sh',
         'logg.log',
         'README.md',
-        '.gitignore',
         'rice-cook.py',
         'Laptop-configs',
-        '.ideavimrc',
     ]
 
     for z in exceptions:
         if z in lis:
             lis.remove(z)
 
+    # filter out .
+    lis = [item for item in lis if not item.startswith('.')]
+
     destination = os.path.join(home, '.config')
 
-    shutil.copy2('.zshrc', home)
-    shutil.copy2('.p10k.zsh', home)
-    shutil.copy2('.vimrc', home)
-    shutil.copy2('.ideavimrc', home)
+    shutil.copy2('dotfiles/.zshrc', home)
+    shutil.copy2('dotfiles/.p10k.zsh', home)
+    shutil.copy2('dotfiles/.vimrc', home)
+    shutil.copy2('dotfiles/.ideavimrc', home)
 
     if setup == 'l':
         console.print("Setting up dotfiles for Laptop", style='ok')
@@ -301,12 +303,17 @@ def copy_dotfiles(setup):
     elif setup == 'd':
         console.print("Setting up dotfiles for Desktop", style='ok')
 
-        # copying files recursively
         for dir in lis:
-            print(subprocess.run(f'cp -r {dir} {destination}', shell=True))
+            source = os.path.join('dotfiles', dir)
+            dest = os.path.join(destination, dir)
 
-    console.print("Dotfiles copied :heavy_check_mark:", style='ok')
-    logger.info('Dotfiles copied')
+            try:
+                print(shutil.copytree(source, dest, dirs_exist_ok=True))
+            except NotADirectoryError:
+                shutil.copy2(source, dest)
+
+        console.print("Dotfiles copied :heavy_check_mark:", style='ok')
+        logger.info('Dotfiles copied')
 
 
 def executable_scripts():
