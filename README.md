@@ -67,7 +67,8 @@ Should look like this .
 Need to correct ownership of home directory
 
 ```
-sudo chown -R user:user /home/username
+sudo chown -R "$USER:$USER" $HOME
+
 ```
 
 ## A snapshot of your current fedora config can be generated with this script
