@@ -10,8 +10,9 @@ import subprocess
 import requests
 import shutil
 import logging
-import gdown
 from git import Repo
+import zipfile
+import urllib.request
 from rich.console import Console
 from rich.theme import Theme
 from slimParser import SlimParser
@@ -366,17 +367,12 @@ def msic_configs():
     logger.info('candy-icons downloaded')
 
     try:
-        themes_urls = [
-            'https://drive.google.com/uc?id=1KkqC5vaBjePSHxjBI_8PWfm3jNW5gO7k',
-            'https://drive.google.com/uc?id=1-qq3wmuQhkKHpW_8OrRNS92AHD9LE4un',
-            'https://drive.google.com/uc?id=1mxkN9b4Ws7CeqF_KaTlA3dA5e75UUa4y',
-            'https://drive.google.com/uc?id=1cYLRsxmWeQJMOS7QEGEgJenRPKxgwN7X',
-        ]
 
-        for index, file in enumerate(themes_urls):
-            output = str(index) + '.zip'
-            gdown.download(file, output, quiet=False)
-            subprocess.run(f"unzip {output} -d {os.path.join(home, '.themes')}", shell=True, stdout=subprocess.DEVNULL)
+        url = 'https://github.com/catppuccin/gtk/releases/download/v1.0.3/catppuccin-mocha-blue-standard+default.zip'
+        urllib.request.urlretrieve(url,'catppuccin-mocha-blue.zip')
+
+        with zipfile.ZipFile('catppuccin-mocha-blue.zip') as zip:
+            zip.extractall(os.path.join(home,'.themes'))
 
         # to system
         shutil.copytree(home + "/.themes", '/usr/share/themes/', dirs_exist_ok=True)
@@ -387,13 +383,13 @@ def msic_configs():
         ## Set themes Gtk
         subprocess.run("gsettings set org.gnome.desktop.interface icon-theme 'candy-icons'", shell=True)
         subprocess.run(
-            "gsettings set org.gnome.desktop.interface gtk-theme 'Catppuccin-Macchiato-Standard-Blue-Dark'", shell=True
+            "gsettings set org.gnome.desktop.interface gtk-theme 'catppuccin-mocha-blue-standard+default'", shell=True
         )
         subprocess.run("gsettings set org.gnome.desktop.interface font-name 'Roboto-Regular'", shell=True)
 
         # Flatpak force theme
         subprocess.run("flatpak override --filesystem=$HOME/.themes", shell=True)
-        subprocess.run("flatpak override --env=GTK_THEME=Catppuccin-Macchiato-Standard-Blue-Dark", shell=True)
+        subprocess.run("flatpak override --env=GTK_THEME=catppuccin-mocha-blue-standard+default", shell=True)
         console.print("Themes have been Set :heavy_check_mark:", style='ok')
         logger.info('Themes have been Set')
 
