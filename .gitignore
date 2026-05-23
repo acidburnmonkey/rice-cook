@@ -4,3 +4,6 @@ dist
 rice-cook.spec
 __pycache__
 test.py
+dotfiles/
+testdir/
+logg.log

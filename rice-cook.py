@@ -29,7 +29,7 @@ f_handler.setFormatter(formatter)
 logger.addHandler(f_handler)
 
 logging.basicConfig(
-    format="%(asctime)s | %(levelno)s | %(funcName)s| %(message)s ", filename='logg.log', level=logging.WARNING
+    format="%(asctime)s | %(levelno)s | %(funcName)s| %(message)s ", filename='logg.log', level=logging.INFO
 )
 
 ap_theme = Theme({'ok': 'green', 'error': 'red', 'checked': 'bold cyan', 'rule': 'orange1'})
@@ -268,22 +268,7 @@ def copy_dotfiles(setup):
     console.rule("Copying Dotfiles", style='checked')
 
     # list of relevant configs
-    lis = os.listdir('dotfiles')
-    exceptions = [
-        'retired',
-        'data.conf',
-        'wrappedhl',
-        'Hyprland',
-        'install.sh',
-        'logg.log',
-        'README.md',
-        'rice-cook.py',
-        'Laptop-configs',
-    ]
-
-    for z in exceptions:
-        if z in lis:
-            lis.remove(z)
+    lis = os.listdir('dotfiles/desktop')
 
     # filter out .
     lis = [item for item in lis if not item.startswith('.')]
@@ -367,12 +352,11 @@ def msic_configs():
     logger.info('candy-icons downloaded')
 
     try:
-
         url = 'https://github.com/catppuccin/gtk/releases/download/v1.0.3/catppuccin-mocha-blue-standard+default.zip'
-        urllib.request.urlretrieve(url,'catppuccin-mocha-blue.zip')
+        urllib.request.urlretrieve(url, 'catppuccin-mocha-blue.zip')
 
         with zipfile.ZipFile('catppuccin-mocha-blue.zip') as zip:
-            zip.extractall(os.path.join(home,'.themes'))
+            zip.extractall(os.path.join(home, '.themes'))
 
         # to system
         shutil.copytree(home + "/.themes", '/usr/share/themes/', dirs_exist_ok=True)
