@@ -2,13 +2,14 @@
 this script parses conf file [section] -> content as key value pairs of Slimparser()
 '''
 
+
 class SlimParser:
-    def __init__(self,file):
+    def __init__(self, file):
         self.file = file
         self.headers = {}
         self.current_key = None
 
-        #run on init
+        # run on init
         with open(file, 'r') as f:
             text = f.read()
 
@@ -33,20 +34,17 @@ class SlimParser:
             elif self.current_key:
                 self.headers[self.current_key].append(line)
 
-
     def getHeaders(self):
-        return (self.headers.keys())
+        return self.headers.keys()
 
-    def get(self,section):
+    def get(self, section):
         """Returns the header"""
         return self.headers.get(section)
 
     def cleanSection(self, section):
         """Strips and removes empty lines, duplicates from a section."""
         if section in self.headers:
-            self.headers[section] = list(set(
-                    line.strip() for line in self.headers[section] if line.strip()
-                    ))
+            self.headers[section] = list(set(line.strip() for line in self.headers[section] if line.strip()))
 
         elif section not in self.headers:
             raise ValueError(f"Section '{section}' not found in headers.")
@@ -54,6 +52,4 @@ class SlimParser:
     def cleanAll(self):
         """Strips and removes empty lines, duplicates from a All the file."""
         for section in self.headers.keys():
-            self.headers[section] = list(set(
-                    line.strip() for line in self.headers[section] if line.strip()
-                    ))
+            self.headers[section] = list(set(line.strip() for line in self.headers[section] if line.strip()))

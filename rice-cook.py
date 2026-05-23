@@ -4,17 +4,19 @@
 # https://github.com/acidburnmonkey
 #
 
+import logging
 import os
 import re
-import subprocess
-import requests
 import shutil
-import logging
-from git import Repo
-import zipfile
+import subprocess
 import urllib.request
+import zipfile
+
+import requests
+from git import Repo
 from rich.console import Console
 from rich.theme import Theme
+
 from slimParser import SlimParser
 
 # pylint: disable=subprocess-run-check

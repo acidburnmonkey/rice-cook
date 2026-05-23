@@ -26,10 +26,10 @@ jobs:
         run: uv tool install ruff && uv tool install codespell
 
       - name: ruff import sort
-        run: ruff check --select I --fix .
+        run: ruff check --select I --fix --config .github/workflows/pyproject.toml .
 
       - name: ruff format
-        run: ruff format .
+        run: ruff format --config .github/workflows/pyproject.toml .
 
       - name: codespell
         run: codespell --write-changes
